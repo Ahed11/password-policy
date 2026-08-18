@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,8 +19,32 @@ const (
 	FormatJSON
 )
 
+func LoadConfig(path string) (Config, error) {
+	data, format, err := ReadPolicyFile(path)
+	if err != nil {
+		return Config{}, err
+	}
+
+	config, err := decodePolicyData(data, format)
+	if err != nil {
+		return Config{}, fmt.Errorf("decode policy data: %w", err)
+	}
+
+	maxExists, err := lengthMaxExists(data, format)
+	if err != nil {
+		return Config{}, fmt.Errorf("check length.max in %q: %w", path, err)
+	}
+
+	if !maxExists {
+		config.Policy.Length.Max = config.Policy.Length.Min
+	}
+
+	return config, nil
+}
+
 func ReadPolicyFile(path string) ([]byte, Format, error) {
 	data, err := os.ReadFile(path)
+
 	if err != nil {
 		return nil, FormatUnknown, fmt.Errorf("read policy file %q: %w", path, err)
 	}
@@ -71,4 +96,114 @@ func determineFormatFromDataWithoutExtension(data []byte) (Format, error) {
 		}
 	}
 	return FormatUnknown, fmt.Errorf("unknown policy file format")
+}
+
+func decodePolicyData(data []byte, format Format) (Config, error) {
+	config := defaultConfig()
+
+	switch format {
+	case FormatYAML:
+		dec := yaml.NewDecoder(bytes.NewReader(data))
+		dec.KnownFields(true)
+
+		if decodeErr := dec.Decode(&config); decodeErr != nil {
+			return Config{}, fmt.Errorf("unmarshal YAML: %w", decodeErr)
+		}
+	case FormatJSON:
+		dec := json.NewDecoder(bytes.NewReader(data))
+		dec.DisallowUnknownFields()
+
+		if decodeErr := dec.Decode(&config); decodeErr != nil {
+			return Config{}, fmt.Errorf("unmarshal JSON: %w", decodeErr)
+		}
+	default:
+		return Config{}, fmt.Errorf("unsupported format: %v", format)
+	}
+
+	return config, nil
+}
+
+func lengthMaxExists(data []byte, format Format) (bool, error) {
+	switch format {
+	case FormatYAML:
+		return lengthMaxExistsYAML(data)
+	case FormatJSON:
+		return lengthMaxExistsJSON(data)
+	default:
+		return false, fmt.Errorf("unsupported format: %v", format)
+	}
+}
+
+func mappingValue(node *yaml.Node, key string) (*yaml.Node, bool) {
+	if node == nil || node.Kind != yaml.MappingNode {
+		return nil, false
+	}
+
+	for i := 0; i < len(node.Content); i += 2 {
+		keyNode := node.Content[i]
+		valueNode := node.Content[i+1]
+
+		if keyNode.Value == key {
+			return valueNode, true
+		}
+	}
+
+	return nil, false
+}
+
+func lengthMaxExistsYAML(data []byte) (bool, error) {
+	var root yaml.Node
+
+	if err := yaml.Unmarshal(data, &root); err != nil {
+		return false, fmt.Errorf("parse YAML tree: %w", err)
+	}
+
+	if len(root.Content) == 0 {
+		return false, nil
+	}
+
+	document := root.Content[0]
+
+	policyNode, ok := mappingValue(document, "policy")
+	if !ok {
+		return false, nil
+	}
+
+	lengthNode, ok := mappingValue(policyNode, "length")
+	if !ok {
+		return false, nil
+	}
+
+	_, ok = mappingValue(lengthNode, "max")
+	return ok, nil
+}
+
+func lengthMaxExistsJSON(data []byte) (bool, error) {
+	var root map[string]json.RawMessage
+	if err := json.Unmarshal(data, &root); err != nil {
+		return false, fmt.Errorf("parse JSON root: %w", err)
+	}
+
+	policyData, ok := root["policy"]
+	if !ok {
+		return false, nil
+	}
+
+	var policyObject map[string]json.RawMessage
+	if err := json.Unmarshal(policyData, &policyObject); err != nil {
+		return false, fmt.Errorf("parse JSON policy: %w", err)
+	}
+
+	lengthData, ok := policyObject["length"]
+	if !ok {
+		return false, nil
+	}
+
+	var lengthObject map[string]json.RawMessage
+	if err := json.Unmarshal(lengthData, &lengthObject); err != nil {
+		return false, fmt.Errorf("parse JSON policy.length: %w", err)
+	}
+
+	_, ok = lengthObject["max"]
+	return ok, nil
 }

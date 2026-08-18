@@ -1,6 +1,6 @@
 package policy
 
-func defaultPolicy() Config {
+func defaultConfig() Config {
 	config := Config{
 		Policy: Policy{
 			Length: Length{
