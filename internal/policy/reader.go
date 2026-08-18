@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"io"
 	"path/filepath"
 	"strings"
 
@@ -109,12 +110,35 @@ func decodePolicyData(data []byte, format Format) (Config, error) {
 		if decodeErr := dec.Decode(&config); decodeErr != nil {
 			return Config{}, fmt.Errorf("unmarshal YAML: %w", decodeErr)
 		}
+
+		var extra any
+		err := dec.Decode(&extra)
+
+		if err == nil {
+			return Config{}, fmt.Errorf("YAML policy must contain exactly one document")
+		}
+
+		if err != io.EOF {
+			return Config{}, fmt.Errorf("read trailing YAML data: %w", err)
+		}
+
 	case FormatJSON:
 		dec := json.NewDecoder(bytes.NewReader(data))
 		dec.DisallowUnknownFields()
 
 		if decodeErr := dec.Decode(&config); decodeErr != nil {
 			return Config{}, fmt.Errorf("unmarshal JSON: %w", decodeErr)
+		}
+
+		var extra any
+		err := dec.Decode(&extra)
+
+		if err == nil {
+			return Config{}, fmt.Errorf("JSON policy must contain exactly one value")
+		}
+
+		if err != io.EOF {
+			return Config{}, fmt.Errorf("read trailing JSON data: %w", err)
 		}
 	default:
 		return Config{}, fmt.Errorf("unsupported format: %v", format)
