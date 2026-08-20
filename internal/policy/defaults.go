@@ -28,10 +28,9 @@ func defaultConfig() Config {
 			},
 		},
 		Issue: Issue{
-			PoolSize: 16,
-			//Store:       "", пока не понятно какое значение по умолчанию, поэтому оставим пустым
-			History:     History{Window: 0, Ttl: ""},
-			RotateAfter: "",
+			PoolSize:    16,
+			History:     History{Window: 0, Ttl: "0s"},
+			RotateAfter: "0s",
 		},
 	}
 
