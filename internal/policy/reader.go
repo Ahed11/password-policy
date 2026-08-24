@@ -2,13 +2,15 @@ package policy
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
-	"os"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"encoding/json"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,23 +23,41 @@ const (
 )
 
 func LoadConfig(path string) (Config, error) {
-	data, format, err := ReadPolicyFile(path)
-	if err != nil {
-		return Config{}, err
+	data, format, readErr := ReadPolicyFile(path)
+	if readErr != nil {
+		return Config{}, readErr
 	}
 
-	config, err := decodePolicyData(data, format)
-	if err != nil {
-		return Config{}, fmt.Errorf("decode policy data: %w", err)
+	config, canValidate, decodeErr := decodePolicyData(data, format)
+	if decodeErr != nil && !canValidate {
+		return Config{}, fmt.Errorf("decode policy data: %w", decodeErr)
 	}
 
-	maxExists, err := lengthMaxExists(data, format)
-	if err != nil {
-		return Config{}, fmt.Errorf("check length.max in %q: %w", path, err)
+	maxExists, maxErr := lengthMaxExists(data, format)
+	if maxErr != nil {
+		if decodeErr != nil {
+			return Config{}, errors.Join(decodeErr, fmt.Errorf("check length.max in %q: %w", path, maxErr))
+		}
+
+		return Config{}, fmt.Errorf("check length.max in %q: %w", path, maxErr)
 	}
 
 	if !maxExists {
 		config.Policy.Length.Max = config.Policy.Length.Min
+	}
+
+	validationErrors := ValidatePolicy(config)
+
+	diagnostics := []error{}
+
+	if decodeErr != nil {
+		diagnostics = append(diagnostics, decodeErr)
+	}
+
+	diagnostics = append(diagnostics, validationErrors...)
+
+	if len(diagnostics) > 0 {
+		return Config{}, errors.Join(diagnostics...)
 	}
 
 	return config, nil
@@ -99,7 +119,7 @@ func determineFormatFromDataWithoutExtension(data []byte) (Format, error) {
 	return FormatUnknown, fmt.Errorf("unknown policy file format")
 }
 
-func decodePolicyData(data []byte, format Format) (Config, error) {
+func decodePolicyData(data []byte, format Format) (Config, bool, error) {
 	config := defaultConfig()
 
 	switch format {
@@ -107,44 +127,74 @@ func decodePolicyData(data []byte, format Format) (Config, error) {
 		dec := yaml.NewDecoder(bytes.NewReader(data))
 		dec.KnownFields(true)
 
+		var diagnostics []error
+
 		if decodeErr := dec.Decode(&config); decodeErr != nil {
-			return Config{}, fmt.Errorf("unmarshal YAML: %w", decodeErr)
+			decodeErrors := formatYAMLDecodeErrors(data, decodeErr)
+			formattedDecodeErr := errors.Join(decodeErrors...)
+
+
+			var typeErr *yaml.TypeError
+
+			if !errors.As(decodeErr, &typeErr) {
+				return Config{}, false, fmt.Errorf("unmarshal YAML: %w", formattedDecodeErr)
+			}
+
+			diagnostics = append(diagnostics, formattedDecodeErr)
 		}
 
 		var extra any
-		err := dec.Decode(&extra)
+		trailingErr := dec.Decode(&extra)
 
-		if err == nil {
-			return Config{}, fmt.Errorf("YAML policy must contain exactly one document")
+		if trailingErr == nil {
+			diagnostics = append(diagnostics, fmt.Errorf("YAML policy must contain exactly one document"))
+		} else if !errors.Is(trailingErr, io.EOF) {
+			diagnostics = append( diagnostics, fmt.Errorf("read trailing YAML data: %w", trailingErr))
 		}
 
-		if err != io.EOF {
-			return Config{}, fmt.Errorf("read trailing YAML data: %w", err)
+		if len(diagnostics) > 0 {
+			return config, true, fmt.Errorf("unmarshal YAML: %w", errors.Join(diagnostics...))
 		}
-
 	case FormatJSON:
+		unknownFieldErrors, walkErr := validateJSONFields(data)
+
+		diagnostics := append([]error{}, unknownFieldErrors...)
+
+		if walkErr != nil {
+			diagnostics = append(diagnostics, fmt.Errorf("walk JSON structure: %w", walkErr))
+
+			return Config{}, false, fmt.Errorf("unmarshal JSON: %w", errors.Join(diagnostics...))
+		}
+
 		dec := json.NewDecoder(bytes.NewReader(data))
-		dec.DisallowUnknownFields()
 
 		if decodeErr := dec.Decode(&config); decodeErr != nil {
-			return Config{}, fmt.Errorf("unmarshal JSON: %w", decodeErr)
+			diagnostics = append(diagnostics, decodeErr)
+
+			var typeErr *json.UnmarshalTypeError
+
+			if !errors.As(decodeErr, &typeErr) {
+				return Config{}, false, fmt.Errorf("unmarshal JSON: %w", errors.Join(diagnostics...))
+			}
 		}
 
 		var extra any
-		err := dec.Decode(&extra)
+		trailingErr := dec.Decode(&extra)
 
-		if err == nil {
-			return Config{}, fmt.Errorf("JSON policy must contain exactly one value")
+		if trailingErr == nil {
+			diagnostics = append(diagnostics, fmt.Errorf("JSON policy must contain exactly one value"))
+		} else if trailingErr != io.EOF {
+			diagnostics = append(diagnostics, fmt.Errorf("read trailing JSON data: %w", trailingErr))
 		}
 
-		if err != io.EOF {
-			return Config{}, fmt.Errorf("read trailing JSON data: %w", err)
+		if len(diagnostics) > 0 {
+			return config, true, fmt.Errorf("unmarshal JSON: %w", errors.Join(diagnostics...))
 		}
 	default:
-		return Config{}, fmt.Errorf("unsupported format: %v", format)
+		return Config{}, false, fmt.Errorf("unsupported format: %v", format)
 	}
 
-	return config, nil
+	return config, true, nil
 }
 
 func lengthMaxExists(data []byte, format Format) (bool, error) {
