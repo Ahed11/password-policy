@@ -253,6 +253,29 @@ func TestValidatePolicy(t *testing.T) {
 				"issue.rotate_after: unknown suffix: \"q\"",
 			},
 		},
+		{
+			name: "repeat_run_negative",
+			modify: func(c *Config) {
+				c.Policy.Forbid.RepeatRun = -1
+			},
+			wantErr: []string{
+				"policy.forbid.repeat_run: must be greater than or equal to 0",
+			},
+		},
+		{
+			name: "repeat_run_zero",
+			modify: func(c *Config) {
+				c.Policy.Forbid.RepeatRun = 0
+			},
+			wantErr: []string{},
+		},
+		{
+			name: "repeat_run_one",
+			modify: func(c *Config) {
+				c.Policy.Forbid.RepeatRun = 1
+			},
+			wantErr: []string{},
+		},
 	}
 
 	for _, test := range tests {
