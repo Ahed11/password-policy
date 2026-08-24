@@ -1,18 +1,18 @@
 package policy
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
 
 type errorLine struct {
-	line int
+	line    int
 	message string
 }
 
-func yamlErrorLines(err error) ([]errorLine) {	
+func yamlErrorLines(err error) []errorLine {
 	var yamlErr *yaml.TypeError
 
 	var allErrors = []errorLine{}
@@ -31,12 +31,12 @@ func yamlErrorLines(err error) ([]errorLine) {
 		n, scanErr := fmt.Sscanf(message, "line %d:", &line)
 		if scanErr == nil && n == 1 && line > 0 {
 			allErrors = append(allErrors, errorLine{
-				line: line,
+				line:    line,
 				message: message,
 			})
 		} else {
 			allErrors = append(allErrors, errorLine{
-				line: 0,
+				line:    0,
 				message: message,
 			})
 		}
@@ -115,23 +115,23 @@ func formatYAMLDecodeErrors(yamlDoc []byte, decodeErr error) []error {
 	if err := yaml.Unmarshal(yamlDoc, &root); err != nil {
 		return []error{decodeErr}
 	}
-	
-	errorLines := yamlErrorLines(decodeErr)	
-	
+
+	errorLines := yamlErrorLines(decodeErr)
+
 	var diagnostics []error
 
 	if len(errorLines) == 0 {
 		diagnostics = append(diagnostics, fmt.Errorf("error of decoding: %w", decodeErr))
 	}
-	
+
 	for _, er := range errorLines {
 		path, found := findYAMLPathByLine(&root, er.line)
-		
+
 		if found {
 			diagnostics = append(diagnostics, fmt.Errorf("%s: %s", path, er.message))
 			continue
 		}
-		
+
 		diagnostics = append(diagnostics, fmt.Errorf("%s", er.message))
 	}
 
