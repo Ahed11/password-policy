@@ -16,7 +16,7 @@ func buildClasses(classes []classDefinition, exclude string) ([]normalizedClass,
 
 	normalizedClasses, normalizeClassErrors := normalizeClasses(classes, exclude)
 	diagnostics = append(diagnostics, normalizeClassErrors...)
-	
+
 	validateClassErrors := validateClassIntersections(normalizedClasses)
 	diagnostics = append(diagnostics, validateClassErrors...)
 
