@@ -11,9 +11,9 @@ import (
 )
 
 func TestYAMLErrorLines(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name string
-		err error
+		err  error
 		want []errorLine
 	}{
 		{
@@ -40,11 +40,11 @@ func TestYAMLErrorLines(t *testing.T) {
 			},
 			want: []errorLine{
 				{
-					line: 8,
+					line:    8,
 					message: "line 8: field foo not found in type policy.Length",
 				},
 				{
-					line: 10,
+					line:    10,
 					message: "line 10: field bar not found in type policy.Length",
 				},
 			},
@@ -58,14 +58,14 @@ func TestYAMLErrorLines(t *testing.T) {
 			},
 			want: []errorLine{
 				{
-					line: 0,
+					line:    0,
 					message: "some yaml problem",
 				},
 			},
 		},
 		{
 			name: "not_yaml_type_error",
-			err: fmt.Errorf("ordinary error"),
+			err:  fmt.Errorf("ordinary error"),
 			want: nil,
 		},
 		{
@@ -97,12 +97,12 @@ func TestYAMLErrorLines(t *testing.T) {
 }
 
 func TestFindYAMLPathByLine(t *testing.T) {
-	tests := []struct{
-		name string
-		policy []byte
-		line int
+	tests := []struct {
+		name      string
+		policy    []byte
+		line      int
 		wantFound bool
-		wantPath string
+		wantPath  string
 	}{
 		{
 			name: "unknown_field_1",
@@ -112,9 +112,9 @@ policy:
     length:
         min: 12
         foo: 100`),
-		line: 6,
-		wantFound: true,
-		wantPath: "policy.length.foo",
+			line:      6,
+			wantFound: true,
+			wantPath:  "policy.length.foo",
 		},
 		{
 			name: "unknown_field_2",
@@ -124,9 +124,9 @@ policy:
     classes:
       - name: digits
         foo: 100`),
-		line: 6,
-		wantFound: true,
-		wantPath: "policy.classes[0].foo",
+			line:      6,
+			wantFound: true,
+			wantPath:  "policy.classes[0].foo",
 		},
 		{
 			name: "unknown_field_2",
@@ -136,9 +136,9 @@ policy:
     classes:
       - name: digits
         foo: 100`),
-		line: 999,
-		wantFound: false,
-		wantPath: "",
+			line:      999,
+			wantFound: false,
+			wantPath:  "",
 		},
 	}
 
@@ -154,6 +154,93 @@ policy:
 
 			assert.Equal(t, test.wantFound, found)
 			assert.Equal(t, test.wantPath, fieldPath)
+		})
+	}
+}
+
+func TestFormatYAMLDecodeErrors(t *testing.T) {
+	tests := []struct {
+		name       string
+		yamlDoc    []byte
+		decodeErr  error
+		wantErrors []string
+	}{
+		{
+			name: "one_unknown_field",
+			yamlDoc: []byte(`version: 1
+policy:
+  length:
+    min: 12
+    foo: 100`),
+			decodeErr: &yaml.TypeError{
+				Errors: []string{
+					"line 5: field foo not found in type policy.Length",
+				},
+			},
+			wantErrors: []string{
+				"policy.length.foo: line 5: field foo not found in type policy.Length",
+			},
+		},
+		{
+			name: "multiple_unknown_fields",
+			yamlDoc: []byte(`version: 1
+policy:
+  length:
+    foo: 1
+    bar: 2`),
+			decodeErr: &yaml.TypeError{
+				Errors: []string{
+					"line 4: field foo not found in type policy.Length",
+					"line 5: field bar not found in type policy.Length",
+				},
+			},
+			wantErrors: []string{
+				"policy.length.foo: line 4: field foo not found in type policy.Length",
+				"policy.length.bar: line 5: field bar not found in type policy.Length",
+			},
+		},
+		{
+			name:    "non_yaml_type_error",
+			yamlDoc: []byte(`version: 1`),
+			decodeErr: fmt.Errorf(
+				"ordinary decode error",
+			),
+			wantErrors: []string{
+				"error of decoding: ordinary decode error",
+			},
+		},
+		{
+			name:    "path_not_found",
+			yamlDoc: []byte(`version: 1`),
+			decodeErr: &yaml.TypeError{
+				Errors: []string{
+					"line 999: field foo not found",
+				},
+			},
+			wantErrors: []string{
+				"line 999: field foo not found",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := formatYAMLDecodeErrors(test.yamlDoc, test.decodeErr)
+
+			gotMessages := []string{}
+
+			for _, err := range got {
+				if err != nil {
+					gotMessages = append(gotMessages, err.Error())
+				}
+			}
+
+			assert.Equal(
+				t,
+				test.wantErrors,
+				gotMessages,
+				"formatted YAML decode errors don't match expected",
+			)
 		})
 	}
 }
