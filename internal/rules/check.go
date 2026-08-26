@@ -1,0 +1,102 @@
+package rules
+
+import (
+	"fmt"
+
+	"github.com/Ahed11/password-policy/internal/dictionary"
+)
+
+type Violation struct {
+	Rule   string
+	Offset int
+	Length int
+	Layout string
+}
+
+type Options struct {
+	RepeatRun        int
+	RepeatTotal      bool
+	AlphabetSequence int
+	KeyboardSequence int
+	KeyboardLayouts  []string
+
+	Dictionary *dictionary.Matcher
+
+	ContextValues          []string
+	ContextMinLength       int
+	ContextCaseInsensitive bool
+	ContextLeet            bool
+}
+
+func Check(password []byte, options Options) ([]Violation, error) {
+	var violations []Violation
+
+	for _, violation := range checkRepeatRun(
+		password,
+		options.RepeatRun,
+	) {
+		violations = append(violations, Violation{
+			Rule:   "repeat_run",
+			Offset: violation.offset,
+			Length: violation.length,
+		})
+	}
+
+	for _, violation := range checkRepeatTotal(
+		password,
+		options.RepeatTotal,
+	) {
+		violations = append(violations, Violation{
+			Rule:   "repeat_total",
+			Offset: violation.offset,
+			Length: violation.length,
+		})
+	}
+
+	for _, violation := range checkAlphabetSequence(
+		password,
+		options.AlphabetSequence,
+	) {
+		violations = append(violations, Violation{
+			Rule:   "sequences.alphabet",
+			Offset: violation.offset,
+			Length: violation.length,
+		})
+	}
+
+	if options.KeyboardSequence > 0 {
+		for _, layoutName := range options.KeyboardLayouts {
+			layout, found := getKeyboardLayout(layoutName)
+			if !found {
+				return nil, fmt.Errorf("unknown keyboard layout %q", layoutName)
+			}
+
+			for _, violation := range checkKeyboardSequence(password, options.KeyboardSequence, layout) {
+				violations = append(violations, Violation{
+					Rule:   "sequences.keyboard",
+					Offset: violation.offset,
+					Length: violation.length,
+					Layout: violation.layout,
+				})
+			}
+		}
+	}
+
+	for _, violation := range checkDictionary(password, options.Dictionary) {
+		violations = append(violations, Violation{
+			Rule:   "dictionary",
+			Offset: violation.offset,
+			Length: violation.length,
+		})
+	}
+
+	for _, violation := range checkContext(password, options.ContextValues, options.ContextMinLength, options.ContextCaseInsensitive, options.ContextLeet) {
+		violations = append(violations, Violation{
+			Rule:   "context",
+			Offset: violation.offset,
+			Length: violation.length,
+		})
+	}
+
+	return violations, nil
+}
