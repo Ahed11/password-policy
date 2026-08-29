@@ -38,7 +38,7 @@ func TestNewPoolNilContext(t *testing.T) {
 }
 
 func TestNewPoolNilSource(t *testing.T) {
-	pool, err := NewPool(context.Background(), nil, poolTestBuildResult(), poolTestGenerateOptions(1),  1)
+	pool, err := NewPool(context.Background(), nil, poolTestBuildResult(), poolTestGenerateOptions(1), 1)
 
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "random source must not be nil")
@@ -68,7 +68,7 @@ func TestNewPoolCanceledContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	pool, err := NewPool(ctx, bytes.NewReader(nil),poolTestBuildResult(), poolTestGenerateOptions(1), 1)
+	pool, err := NewPool(ctx, bytes.NewReader(nil), poolTestBuildResult(), poolTestGenerateOptions(1), 1)
 
 	assert.Error(t, err)
 	assert.ErrorIs(t, err, context.Canceled)
