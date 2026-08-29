@@ -228,7 +228,7 @@ func (p *Pool) run(source random.Source) {
 				return
 
 			case p.events <- poolEvent{
-				err: fmt.Errorf("refill issue pool: %w", err),
+				err:     fmt.Errorf("refill issue pool: %w", err),
 				version: config.version,
 			}:
 				p.configMu.RUnlock()
