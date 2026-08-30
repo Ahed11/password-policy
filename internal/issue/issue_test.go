@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -511,6 +513,119 @@ func TestIssueNilStore(t *testing.T) {
 	assert.ErrorContains(t, err, "history store must not be nil")
 
 	assert.Equal(t, Result{}, result)
+}
+
+func TestIssueDoesNotStorePlaintextPasswords(t *testing.T) {
+	storeDir := filepath.Join(t.TempDir(), "history")
+
+	store, err := history.Open(storeDir)
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		require.NoError(t, store.Close())
+	})
+
+	testCases := []struct {
+		subject   string
+		character byte
+		saltSeed  byte
+	}{
+		{
+			subject:   "svc-plaintext-01",
+			character: 'Q',
+			saltSeed:  1,
+		},
+		{
+			subject:   "svc-plaintext-02",
+			character: 'R',
+			saltSeed:  33,
+		},
+		{
+			subject:   "svc-plaintext-03",
+			character: 'S',
+			saltSeed:  65,
+		},
+	}
+
+	issuedPasswords := make([][]byte, 0, len(testCases))
+
+	t.Cleanup(func() {
+		for _, password := range issuedPasswords {
+			secret.Zero(password)
+		}
+	})
+
+	for _, testCase := range testCases {
+		buildResult := alphabet.BuildResult{
+			Classes: []alphabet.Class{
+				{
+					Name:     "letters",
+					Alphabet: []rune{rune(testCase.character)},
+				},
+			},
+			Union: []rune{
+				rune(testCase.character),
+			},
+		}
+
+		generateOptions := generate.Options{
+			MinLength: 64,
+			MaxLength: 64,
+			Attempts:  1,
+			ClassMinimums: map[string]int{
+				"letters": 64,
+			},
+			Rules: rules.Options{},
+		}
+
+		options := issueTestOptions(0)
+		options.Subject = testCase.subject
+
+		sourceData := make([]byte, 63, 63+history.SaltSize)
+
+		sourceData = append(sourceData, issueTestSalt(testCase.saltSeed)...)
+
+		result, err := Issue(context.Background(), bytes.NewReader(sourceData), store, buildResult, generateOptions, options)
+		require.NoError(t, err)
+
+		expectedPassword := bytes.Repeat([]byte{testCase.character}, 64)
+
+		require.Equal(t, expectedPassword, result.Password)
+
+		issuedPasswords = append(issuedPasswords, append([]byte(nil), result.Password...))
+
+		secret.Zero(result.Password)
+		secret.Zero(expectedPassword)
+	}
+
+	require.NoError(t, store.Close())
+
+	err = filepath.WalkDir(
+		storeDir,
+		func(path string, entry fs.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+
+			if entry.IsDir() {
+				return nil
+			}
+
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			for _, password := range issuedPasswords {
+				if bytes.Contains(data, password) {
+					t.Errorf("history store file %q contains issued password bytes", path)
+				}
+			}
+
+			return nil
+		},
+	)
+	require.NoError(t, err)
 }
 
 func openIssueTestStore(t *testing.T) *history.Store {
