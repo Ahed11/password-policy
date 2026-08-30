@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	bolt "go.etcd.io/bbolt"
+
 	"github.com/Ahed11/password-policy/internal/secret"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,7 +21,9 @@ func TestAcceptNewPassword(t *testing.T) {
 
 	record := acceptTestRecord("svc-01", password, 1, time.Date(2026, time.August, 28, 12, 0, 0, 0, time.UTC))
 
-	accepted, err := store.Accept("svc-01", password, 3, record)
+	metadata := acceptTestMetadata(3)
+
+	accepted, err := store.Accept("svc-01", password, metadata, record)
 
 	require.NoError(t, err)
 	assert.True(t, accepted)
@@ -29,6 +33,11 @@ func TestAcceptNewPassword(t *testing.T) {
 	require.Len(t, records, 1)
 
 	assertRecordEqual(t, record, records[0])
+
+	gotMetadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, metadata, gotMetadata)
 }
 
 func TestAcceptRejectsReusedPassword(t *testing.T) {
@@ -39,19 +48,69 @@ func TestAcceptRejectsReusedPassword(t *testing.T) {
 
 	base := time.Date(2026, time.August, 28, 12, 0, 0, 0, time.UTC)
 
+	metadata := acceptTestMetadata(3)
+
 	first := acceptTestRecord("svc-01", password, 1, base)
 
-	accepted, err := store.Accept("svc-01", password, 3, first)
+	accepted, err := store.Accept("svc-01", password, metadata, first)
 
 	require.NoError(t, err)
 	require.True(t, accepted)
 
 	second := acceptTestRecord("svc-01", password, 50, base.Add(time.Hour))
 
-	accepted, err = store.Accept("svc-01", password, 3, second)
+	accepted, err = store.Accept("svc-01", password, metadata, second)
 
 	require.NoError(t, err)
 	assert.False(t, accepted)
+
+	records, err := store.List("svc-01")
+	require.NoError(t, err)
+
+	assert.Len(t, records, 1)
+
+	gotMetadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, metadata, gotMetadata)
+}
+
+func TestAcceptRejectedPasswordDoesNotOverwriteMetadata(t *testing.T) {
+	store := openAcceptTestStore(t)
+
+	password := []byte("same-password")
+	defer secret.Zero(password)
+
+	base := time.Date(2026, time.August, 29, 12, 0, 0, 0, time.UTC)
+
+	firstMetadata := Metadata{
+		HistoryWindow: 3,
+		HistoryTTL:    30 * 24 * time.Hour,
+	}
+
+	firstRecord := acceptTestRecord("svc-01", password, 1, base)
+
+	accepted, err := store.Accept("svc-01", password, firstMetadata, firstRecord)
+
+	require.NoError(t, err)
+	require.True(t, accepted)
+
+	secondMetadata := Metadata{
+		HistoryWindow: 10,
+		HistoryTTL:    180 * 24 * time.Hour,
+	}
+
+	secondRecord := acceptTestRecord("svc-01", password, 50, base.Add(time.Hour))
+
+	accepted, err = store.Accept("svc-01", password, secondMetadata, secondRecord)
+
+	require.NoError(t, err)
+	assert.False(t, accepted)
+
+	gotMetadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, firstMetadata, gotMetadata)
 
 	records, err := store.List("svc-01")
 	require.NoError(t, err)
@@ -67,16 +126,18 @@ func TestAcceptWindowZeroAllowsReuse(t *testing.T) {
 
 	base := time.Date(2026, time.August, 28, 12, 0, 0, 0, time.UTC)
 
+	metadata := acceptTestMetadata(0)
+
 	first := acceptTestRecord("svc-01", password, 1, base)
 
-	accepted, err := store.Accept("svc-01", password, 0, first)
+	accepted, err := store.Accept("svc-01", password, metadata, first)
 
 	require.NoError(t, err)
 	require.True(t, accepted)
 
 	second := acceptTestRecord("svc-01", password, 50, base.Add(time.Hour))
 
-	accepted, err = store.Accept("svc-01", password, 0, second)
+	accepted, err = store.Accept("svc-01", password, metadata, second)
 
 	require.NoError(t, err)
 	assert.True(t, accepted)
@@ -85,6 +146,11 @@ func TestAcceptWindowZeroAllowsReuse(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, records, 2)
+
+	gotMetadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, metadata, gotMetadata)
 }
 
 func TestAcceptOnlyChecksMostRecentWindow(t *testing.T) {
@@ -108,7 +174,9 @@ func TestAcceptOnlyChecksMostRecentWindow(t *testing.T) {
 
 	newRecord := acceptTestRecord("svc-01", oldPassword, 60, base.Add(3*time.Hour))
 
-	accepted, err := store.Accept("svc-01", oldPassword, 2, newRecord)
+	metadata := acceptTestMetadata(2)
+
+	accepted, err := store.Accept("svc-01", oldPassword, metadata, newRecord)
 
 	require.NoError(t, err)
 	assert.True(t, accepted)
@@ -117,6 +185,11 @@ func TestAcceptOnlyChecksMostRecentWindow(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, records, 4)
+
+	gotMetadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, metadata, gotMetadata)
 }
 
 func TestAcceptRejectsPasswordInsideWindow(t *testing.T) {
@@ -140,7 +213,7 @@ func TestAcceptRejectsPasswordInsideWindow(t *testing.T) {
 
 	record := acceptTestRecord("svc-01", secondPassword, 60, base.Add(3*time.Hour))
 
-	accepted, err := store.Accept("svc-01", secondPassword, 2, record)
+	accepted, err := store.Accept("svc-01", secondPassword, acceptTestMetadata(2), record)
 
 	require.NoError(t, err)
 	assert.False(t, accepted)
@@ -149,6 +222,10 @@ func TestAcceptRejectsPasswordInsideWindow(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, records, 3)
+
+	_, err = store.LoadMetadata()
+
+	assert.ErrorIs(t, err, ErrMetadataNotFound)
 }
 
 func TestAcceptChecksOnlyRequestedSubject(t *testing.T) {
@@ -163,7 +240,7 @@ func TestAcceptChecksOnlyRequestedSubject(t *testing.T) {
 
 	record := acceptTestRecord("svc-01", password, 30, base.Add(time.Hour))
 
-	accepted, err := store.Accept("svc-01", password, 5, record)
+	accepted, err := store.Accept("svc-01", password, acceptTestMetadata(5), record)
 
 	require.NoError(t, err)
 	assert.True(t, accepted)
@@ -174,6 +251,147 @@ func TestAcceptChecksOnlyRequestedSubject(t *testing.T) {
 	assert.Len(t, records, 1)
 }
 
+func TestAcceptUpdatesMetadataOnSuccessfulIssue(t *testing.T) {
+	store := openAcceptTestStore(t)
+
+	firstPassword := []byte("first-password")
+	secondPassword := []byte("second-password")
+
+	defer secret.Zero(firstPassword)
+	defer secret.Zero(secondPassword)
+
+	base := time.Date(2026, time.August, 29, 12, 0, 0, 0, time.UTC)
+
+	firstMetadata := Metadata{
+		HistoryWindow: 3,
+		HistoryTTL:    30 * 24 * time.Hour,
+	}
+
+	firstAccepted, err := store.Accept("svc-01", firstPassword, firstMetadata, acceptTestRecord("svc-01", firstPassword, 1, base))
+
+	require.NoError(t, err)
+	require.True(t, firstAccepted)
+
+	secondMetadata := Metadata{
+		HistoryWindow: 7,
+		HistoryTTL:    180 * 24 * time.Hour,
+	}
+
+	secondAccepted, err := store.Accept("svc-01", secondPassword, secondMetadata, acceptTestRecord("svc-01", secondPassword, 50, base.Add(time.Hour)))
+
+	require.NoError(t, err)
+	require.True(t, secondAccepted)
+
+	gotMetadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, secondMetadata, gotMetadata)
+}
+
+func TestAcceptInvalidMetadataDoesNotSaveRecord(t *testing.T) {
+	store := openAcceptTestStore(t)
+
+	password := []byte("password")
+	defer secret.Zero(password)
+
+	record := acceptTestRecord("svc-01", password, 1, time.Date(2026, time.August, 29, 12, 0, 0, 0, time.UTC))
+
+	accepted, err := store.Accept(
+		"svc-01",
+		password,
+		Metadata{
+			HistoryWindow: -1,
+			HistoryTTL:    24 * time.Hour,
+		},
+		record,
+	)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "history window must not be negative")
+
+	assert.False(t, accepted)
+
+	records, listErr := store.List("svc-01")
+	require.NoError(t, listErr)
+
+	assert.Empty(t, records)
+
+	_, metadataErr := store.LoadMetadata()
+
+	assert.ErrorIs(t, metadataErr, ErrMetadataNotFound)
+}
+
+func TestAcceptNegativeTTLDoesNotSaveRecord(t *testing.T) {
+	store := openAcceptTestStore(t)
+
+	password := []byte("password")
+	defer secret.Zero(password)
+
+	record := acceptTestRecord("svc-01", password, 1, time.Now().UTC())
+
+	accepted, err := store.Accept(
+		"svc-01",
+		password,
+		Metadata{
+			HistoryWindow: 3,
+			HistoryTTL:    -time.Hour,
+		},
+		record,
+	)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "history ttl must not be negative")
+
+	assert.False(t, accepted)
+
+	records, listErr := store.List("svc-01")
+	require.NoError(t, listErr)
+
+	assert.Empty(t, records)
+}
+
+func TestAcceptRollsBackRecordWhenMetadataWriteFails(t *testing.T) {
+	store := openAcceptTestStore(t)
+
+	err := store.db.Update(
+		func(tx *bolt.Tx) error {
+			bucket, err := tx.CreateBucketIfNotExists(metadataBucket)
+			if err != nil {
+				return err
+			}
+
+			_, err = bucket.CreateBucket(metadataConfigKey)
+
+			return err
+		},
+	)
+	require.NoError(t, err)
+
+	password := []byte("new-password")
+	defer secret.Zero(password)
+
+	record := acceptTestRecord(
+		"svc-01",
+		password,
+		1,
+		time.Date(2026, time.August, 29, 12, 0, 0, 0, time.UTC))
+
+	accepted, err := store.Accept("svc-01", password, acceptTestMetadata(3), record)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "store history metadata")
+
+	assert.False(t, accepted)
+
+	records, listErr := store.List("svc-01")
+	require.NoError(t, listErr)
+
+	assert.Empty(t, records)
+}
+
 func TestAcceptSubjectMismatch(t *testing.T) {
 	store := openAcceptTestStore(t)
 
@@ -182,7 +400,7 @@ func TestAcceptSubjectMismatch(t *testing.T) {
 
 	record := acceptTestRecord("svc-02", password, 1, time.Now().UTC())
 
-	accepted, err := store.Accept("svc-01", password, 3, record)
+	accepted, err := store.Accept("svc-01", password, acceptTestMetadata(3), record)
 
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "does not match subject")
@@ -198,7 +416,7 @@ func TestAcceptEmptySubject(t *testing.T) {
 
 	record := acceptTestRecord("", password, 1, time.Now().UTC())
 
-	accepted, err := store.Accept("", password, 3, record)
+	accepted, err := store.Accept("", password, acceptTestMetadata(3), record)
 
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "subject must not be empty")
@@ -214,7 +432,10 @@ func TestAcceptNegativeWindow(t *testing.T) {
 
 	record := acceptTestRecord("svc-01", password, 1, time.Now().UTC())
 
-	accepted, err := store.Accept("svc-01", password, -1, record)
+	metadata := acceptTestMetadata(3)
+	metadata.HistoryWindow = -1
+
+	accepted, err := store.Accept("svc-01", password, metadata, record)
 
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "history window must not be negative")
@@ -235,7 +456,7 @@ func TestAcceptAfterClose(t *testing.T) {
 
 	record := acceptTestRecord("svc-01", password, 1, time.Now().UTC())
 
-	accepted, err := store.Accept("svc-01", password, 3, record)
+	accepted, err := store.Accept("svc-01", password, acceptTestMetadata(3), record)
 
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "store is not open")
@@ -251,7 +472,7 @@ func TestAcceptNilStore(t *testing.T) {
 
 	record := acceptTestRecord("svc-01", password, 1, time.Now().UTC())
 
-	accepted, err := store.Accept("svc-01", password, 3, record)
+	accepted, err := store.Accept("svc-01", password, acceptTestMetadata(3), record)
 
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "store is not open")
@@ -269,6 +490,8 @@ func TestAcceptConcurrentSamePassword(t *testing.T) {
 
 	issuedAt := time.Date(2026, time.August, 28, 12, 0, 0, 0, time.UTC)
 
+	metadata := acceptTestMetadata(5)
+
 	start := make(chan struct{})
 	results := make(chan bool, goroutines)
 	errorsChannel := make(chan error, goroutines)
@@ -285,7 +508,7 @@ func TestAcceptConcurrentSamePassword(t *testing.T) {
 
 			record := acceptTestRecord("svc-01", password, byte(index*16+1), issuedAt)
 
-			accepted, err := store.Accept("svc-01", password, 5, record)
+			accepted, err := store.Accept("svc-01", password, metadata, record)
 
 			if err != nil {
 				errorsChannel <- err
@@ -321,11 +544,14 @@ func TestAcceptConcurrentSamePassword(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, records, 1, "only one history record must be persisted")
+
+	gotMetadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, metadata, gotMetadata)
 }
 
-func openAcceptTestStore(
-	t *testing.T,
-) *Store {
+func openAcceptTestStore(t *testing.T) *Store {
 	t.Helper()
 
 	store, err := Open(filepath.Join(t.TempDir(), "history"))
@@ -336,6 +562,13 @@ func openAcceptTestStore(
 	})
 
 	return store
+}
+
+func acceptTestMetadata(window int) Metadata {
+	return Metadata{
+		HistoryWindow: window,
+		HistoryTTL:    30 * 24 * time.Hour,
+	}
 }
 
 func acceptTestRecord(subject string, password []byte, saltSeed byte, issuedAt time.Time) Record {

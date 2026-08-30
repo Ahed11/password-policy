@@ -9,7 +9,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-func (s *Store) Accept(subject string, password []byte, window int, record Record) (bool, error) {
+func (s *Store) Accept(subject string, password []byte, metadata Metadata, record Record) (bool, error) {
 	if s == nil || s.db == nil {
 		return false, fmt.Errorf("accept history record: store is not open")
 	}
@@ -18,8 +18,8 @@ func (s *Store) Accept(subject string, password []byte, window int, record Recor
 		return false, fmt.Errorf("accept history record: subject must not be empty")
 	}
 
-	if window < 0 {
-		return false, fmt.Errorf("accept history record: history window must not be negative, got %d", window)
+	if err := validateMetadata(metadata); err != nil {
+		return false, fmt.Errorf("accept history record: %w", err)
 	}
 
 	if record.Subject != subject {
@@ -40,7 +40,7 @@ func (s *Store) Accept(subject string, password []byte, window int, record Recor
 				return fmt.Errorf("records bucket does not exist")
 			}
 
-			if window > 0 {
+			if metadata.HistoryWindow > 0 {
 				stored := make([]storedRecord, 0)
 
 				if err := bucket.ForEach(
@@ -93,7 +93,7 @@ func (s *Store) Accept(subject string, password []byte, window int, record Recor
 					},
 				)
 
-				start := len(stored) - window
+				start := len(stored) - metadata.HistoryWindow
 
 				if start < 0 {
 					start = 0
@@ -117,6 +117,10 @@ func (s *Store) Accept(subject string, password []byte, window int, record Recor
 
 			if err := bucket.Put(key[:], data); err != nil {
 				return fmt.Errorf("store history record: %w", err)
+			}
+
+			if err := putMetadata(tx, metadata); err != nil {
+				return fmt.Errorf("store history metadata: %w", err)
 			}
 
 			accepted = true
