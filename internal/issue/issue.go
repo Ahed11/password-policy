@@ -18,6 +18,7 @@ var ErrHistoryExhausted = errors.New("history_exhausted")
 type Options struct {
 	Subject       string
 	HistoryWindow int
+	HistoryTTL    time.Duration
 	RotateAfter   time.Duration
 	Now           time.Time
 	PolicyName    string
@@ -51,6 +52,10 @@ func Issue(ctx context.Context, source random.Source, store *history.Store, buil
 		return Result{}, fmt.Errorf("issue password: history window must not be negative, got %d", options.HistoryWindow)
 	}
 
+	if options.HistoryTTL < 0 {
+		return Result{}, fmt.Errorf("issue password: history ttl must not be negative")
+	}
+
 	if options.RotateAfter < 0 {
 		return Result{}, fmt.Errorf("issue password: rotate after must not be negative")
 	}
@@ -77,6 +82,11 @@ func Issue(ctx context.Context, source random.Source, store *history.Store, buil
 
 	if options.RotateAfter > 0 {
 		expiresAt = issuedAt.Add(options.RotateAfter).UTC()
+	}
+
+	metadata := history.Metadata{
+		HistoryWindow: options.HistoryWindow,
+		HistoryTTL:    options.HistoryTTL,
 	}
 
 	historyRejected := false
@@ -128,7 +138,7 @@ func Issue(ctx context.Context, source random.Source, store *history.Store, buil
 			PolicyVersion: options.PolicyVersion,
 		}
 
-		accepted, err := store.Accept(options.Subject, password, options.HistoryWindow, record)
+		accepted, err := store.Accept(options.Subject, password, metadata, record)
 		if err != nil {
 			secret.Zero(password)
 

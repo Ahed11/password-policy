@@ -24,21 +24,17 @@ func TestIssue(t *testing.T) {
 
 	salt := issueTestSalt(1)
 
-	result, err := Issue(
-		context.Background(),
-		bytes.NewReader(salt),
-		store,
-		issueTestBuildResult(),
-		issueTestGenerateOptions(3),
-		Options{
-			Subject:       "svc-01",
-			HistoryWindow: 3,
-			RotateAfter:   24 * time.Hour,
-			Now:           now,
-			PolicyName:    "test-policy",
-			PolicyVersion: "version-1",
-		},
-	)
+	options := Options{
+		Subject:       "svc-01",
+		HistoryWindow: 3,
+		HistoryTTL:    180 * 24 * time.Hour,
+		RotateAfter:   24 * time.Hour,
+		Now:           now,
+		PolicyName:    "test-policy",
+		PolicyVersion: "version-1",
+	}
+
+	result, err := Issue(context.Background(), bytes.NewReader(salt), store, issueTestBuildResult(), issueTestGenerateOptions(3), options)
 
 	require.NoError(t, err)
 	defer secret.Zero(result.Password)
@@ -71,33 +67,56 @@ func TestIssue(t *testing.T) {
 	require.Len(t, records, 1)
 
 	assert.True(t, history.Matches(records[0], result.Password))
+
+	metadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		history.Metadata{
+			HistoryWindow: 3,
+			HistoryTTL:    180 * 24 * time.Hour,
+		},
+		metadata,
+	)
 }
 
 func TestIssueWithoutRotation(t *testing.T) {
 	store := openIssueTestStore(t)
 
-	result, err := Issue(
-		context.Background(),
-		bytes.NewReader(
-			issueTestSalt(1),
-		),
-		store,
-		issueTestBuildResult(),
-		issueTestGenerateOptions(1),
-		Options{
-			Subject:       "svc-01",
-			HistoryWindow: 0,
-			RotateAfter:   0,
-			Now:           time.Date(2026, time.August, 28, 12, 0, 0, 0, time.UTC),
-			PolicyName:    "test-policy",
-			PolicyVersion: "version-1",
-		},
-	)
+	options := issueTestOptions(0)
+	options.RotateAfter = 0
+
+	result, err := Issue(context.Background(), bytes.NewReader(issueTestSalt(1)), store, issueTestBuildResult(), issueTestGenerateOptions(1), options)
 
 	require.NoError(t, err)
 	defer secret.Zero(result.Password)
 
 	assert.True(t, result.Record.ExpiresAt.IsZero())
+}
+
+func TestIssueHistoryTTLZero(t *testing.T) {
+	store := openIssueTestStore(t)
+
+	options := issueTestOptions(3)
+	options.HistoryTTL = 0
+
+	result, err := Issue(context.Background(), bytes.NewReader(issueTestSalt(1)), store, issueTestBuildResult(), issueTestGenerateOptions(1), options)
+
+	require.NoError(t, err)
+	defer secret.Zero(result.Password)
+
+	metadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		history.Metadata{
+			HistoryWindow: 3,
+			HistoryTTL:    0,
+		},
+		metadata,
+	)
 }
 
 func TestIssueRejectsReusedPassword(t *testing.T) {
@@ -129,6 +148,10 @@ func TestIssueRejectsReusedPassword(t *testing.T) {
 	require.NoError(t, listErr)
 
 	assert.Len(t, records, 1)
+
+	_, metadataErr := store.LoadMetadata()
+
+	assert.ErrorIs(t, metadataErr, history.ErrMetadataNotFound)
 }
 
 func TestIssueHistoryWindowZeroAllowsReuse(t *testing.T) {
@@ -151,6 +174,18 @@ func TestIssueHistoryWindowZeroAllowsReuse(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, records, 2)
+
+	metadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		history.Metadata{
+			HistoryWindow: 0,
+			HistoryTTL:    options.HistoryTTL,
+		},
+		metadata,
+	)
 }
 
 func TestIssueUsesSharedAttemptsForRulesAndHistory(t *testing.T) {
@@ -240,7 +275,9 @@ func TestIssueSucceedsAfterHistoryRejection(t *testing.T) {
 
 	sourceData = append(sourceData, acceptedSalt...)
 
-	result, err := Issue(context.Background(), bytes.NewReader(sourceData), store, buildResult, generateOptions, issueTestOptions(1))
+	options := issueTestOptions(1)
+
+	result, err := Issue(context.Background(), bytes.NewReader(sourceData), store, buildResult, generateOptions, options)
 
 	require.NoError(t, err)
 	defer secret.Zero(result.Password)
@@ -254,6 +291,18 @@ func TestIssueSucceedsAfterHistoryRejection(t *testing.T) {
 	records, err := store.List("svc-01")
 	require.NoError(t, err)
 	assert.Len(t, records, 2)
+
+	metadata, err := store.LoadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		history.Metadata{
+			HistoryWindow: options.HistoryWindow,
+			HistoryTTL:    options.HistoryTTL,
+		},
+		metadata,
+	)
 }
 
 func TestIssuePolicyTooStrictWithoutHistory(t *testing.T) {
@@ -281,6 +330,10 @@ func TestIssuePolicyTooStrictWithoutHistory(t *testing.T) {
 	records, listErr := store.List("svc-01")
 	require.NoError(t, listErr)
 	assert.Empty(t, records)
+
+	_, metadataErr := store.LoadMetadata()
+
+	assert.ErrorIs(t, metadataErr, history.ErrMetadataNotFound)
 }
 
 func TestIssueSaltSourceError(t *testing.T) {
@@ -367,6 +420,89 @@ func TestIssueNegativeHistoryWindow(t *testing.T) {
 	assert.Equal(t, Result{}, result)
 }
 
+func TestIssueNegativeHistoryTTL(t *testing.T) {
+	store := openIssueTestStore(t)
+
+	options := issueTestOptions(3)
+	options.HistoryTTL = -time.Hour
+
+	result, err := Issue(context.Background(), bytes.NewReader(nil), store, issueTestBuildResult(), issueTestGenerateOptions(1), options)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "history ttl must not be negative")
+
+	assert.Equal(t, Result{}, result)
+
+	records, listErr := store.List("svc-01")
+	require.NoError(t, listErr)
+
+	assert.Empty(t, records)
+
+	_, metadataErr := store.LoadMetadata()
+
+	assert.ErrorIs(t, metadataErr, history.ErrMetadataNotFound)
+}
+
+func TestIssueNegativeRotateAfter(t *testing.T) {
+	store := openIssueTestStore(t)
+
+	options := issueTestOptions(3)
+	options.RotateAfter = -time.Hour
+
+	result, err := Issue(context.Background(), bytes.NewReader(nil), store, issueTestBuildResult(), issueTestGenerateOptions(1), options)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "rotate after must not be negative")
+
+	assert.Equal(t, Result{}, result)
+}
+
+func TestIssueInvalidAttempts(t *testing.T) {
+	store := openIssueTestStore(t)
+
+	generateOptions := issueTestGenerateOptions(0)
+
+	result, err := Issue(context.Background(), bytes.NewReader(nil), store, issueTestBuildResult(), generateOptions, issueTestOptions(3))
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "attempts must be greater than zero")
+
+	assert.Equal(t, Result{}, result)
+}
+
+func TestIssueEmptyPolicyName(t *testing.T) {
+	store := openIssueTestStore(t)
+
+	options := issueTestOptions(3)
+	options.PolicyName = ""
+
+	result, err := Issue(context.Background(), bytes.NewReader(nil), store, issueTestBuildResult(), issueTestGenerateOptions(1), options)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "policy name must not be empty")
+
+	assert.Equal(t, Result{}, result)
+}
+
+func TestIssueEmptyPolicyVersion(t *testing.T) {
+	store := openIssueTestStore(t)
+
+	options := issueTestOptions(3)
+	options.PolicyVersion = ""
+
+	result, err := Issue(context.Background(), bytes.NewReader(nil), store, issueTestBuildResult(), issueTestGenerateOptions(1), options)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "policy version must not be empty")
+
+	assert.Equal(t, Result{}, result)
+}
+
 func TestIssueNilStore(t *testing.T) {
 	result, err := Issue(context.Background(), bytes.NewReader(nil), nil, issueTestBuildResult(), issueTestGenerateOptions(1), issueTestOptions(0))
 
@@ -418,6 +554,7 @@ func issueTestOptions(window int) Options {
 	return Options{
 		Subject:       "svc-01",
 		HistoryWindow: window,
+		HistoryTTL:    30 * 24 * time.Hour,
 		RotateAfter:   24 * time.Hour,
 		Now:           time.Date(2026, time.August, 28, 12, 0, 0, 0, time.UTC),
 		PolicyName:    "test-policy",
