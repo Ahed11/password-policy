@@ -77,7 +77,7 @@ func runPolicyValidate(ctx context.Context, args []string, stdout io.Writer, std
 	if err := ctx.Err(); err != nil {
 		fmt.Fprintf(stderr, "pwp policy validate: %v\n", err)
 
-		return exitFailure
+		return exitUsage
 	}
 
 	cfg, err := policy.LoadConfig(policyPath)
@@ -104,7 +104,7 @@ func runPolicyValidate(ctx context.Context, args []string, stdout io.Writer, std
 	if err := ctx.Err(); err != nil {
 		fmt.Fprintf(stderr, "pwp policy validate: %v\n", err)
 
-		return exitFailure
+		return exitUsage
 	}
 
 	if err := writePolicyValidationResult(stdout, cfg); err != nil {

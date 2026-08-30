@@ -425,6 +425,47 @@ policy:
 	assert.Contains(t, stderr.String(), "missing-layout.txt")
 }
 
+func TestPolicyValidateCanceledContextReturnsExitUsage(t *testing.T) {
+	path := writePolicyValidateTestFile(
+		t,
+		"policy.yaml",
+		`
+version: 1
+policy:
+  name: test-policy
+  length:
+    min: 12
+    max: 12
+  classes:
+    - name: letters
+      alphabet: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+      min: 1
+`,
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := runPolicyValidate(
+		ctx,
+		[]string{
+			"--policy",
+			path,
+		},
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), context.Canceled.Error())
+}
+
 func writePolicyValidateTestFile(t *testing.T, name string, content string) string {
 	t.Helper()
 
