@@ -16,11 +16,12 @@ type Violation struct {
 
 // Options задаёт параметры проверки правил пароля.
 type Options struct {
-	RepeatRun        int
-	RepeatTotal      bool
-	AlphabetSequence int
-	KeyboardSequence int
-	KeyboardLayouts  []string
+	RepeatRun            int
+	RepeatTotal          bool
+	AlphabetSequence     int
+	KeyboardSequence     int
+	KeyboardLayouts      []string
+	KeyboardLayoutTables map[string][][]rune
 
 	Dictionary *dictionary.Matcher
 
@@ -71,7 +72,15 @@ func Check(password []byte, options Options) ([]Violation, error) {
 		for _, layoutName := range options.KeyboardLayouts {
 			layout, found := getKeyboardLayout(layoutName)
 			if !found {
-				return nil, fmt.Errorf("unknown keyboard layout %q", layoutName)
+				rows, exists := options.KeyboardLayoutTables[layoutName]
+				if !exists {
+					return nil, fmt.Errorf("unknown keyboard layout %q", layoutName)
+				}
+
+				layout = keyboardLayout{
+					name: layoutName,
+					rows: rows,
+				}
 			}
 
 			for _, violation := range checkKeyboardSequence(password, options.KeyboardSequence, layout) {

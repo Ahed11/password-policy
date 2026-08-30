@@ -106,6 +106,75 @@ func TestCheckUnknownKeyboardLayout(t *testing.T) {
 	assert.Nil(t, violations)
 }
 
+func TestCheckCustomKeyboardLayout(t *testing.T) {
+	const layoutName = "custom-layout.txt"
+
+	violations, err := Check(
+		[]byte{'1', '2', '3'},
+		Options{
+			KeyboardSequence: 3,
+			KeyboardLayouts: []string{
+				layoutName,
+			},
+			KeyboardLayoutTables: map[string][][]rune{
+				layoutName: {
+					[]rune("12345"),
+					[]rune("abcde"),
+				},
+			},
+		},
+	)
+
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		[]Violation{
+			{
+				Rule:   "sequences.keyboard",
+				Offset: 0,
+				Length: 3,
+				Layout: layoutName,
+			},
+		},
+		violations,
+	)
+}
+
+func TestCheckCustomKeyboardLayoutReverse(t *testing.T) {
+	const layoutName = "custom-layout.txt"
+
+	violations, err := Check(
+		[]byte{'3', '2', '1'},
+		Options{
+			KeyboardSequence: 3,
+			KeyboardLayouts: []string{
+				layoutName,
+			},
+			KeyboardLayoutTables: map[string][][]rune{
+				layoutName: {
+					[]rune("12345"),
+				},
+			},
+		},
+	)
+
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		[]Violation{
+			{
+				Rule:   "sequences.keyboard",
+				Offset: 0,
+				Length: 3,
+				Layout: layoutName,
+			},
+		},
+		violations,
+	)
+}
+
 func loadRulesTestDictionary(t *testing.T, content string) *dictionary.Matcher {
 	t.Helper()
 

@@ -78,16 +78,28 @@ func Prepare(ctx context.Context, cfg policy.Config, options PrepareOptions) (Pr
 		}
 	}
 
+	var keyboardLayoutTables map[string][][]rune
+
+	if cfg.Policy.Forbid.Sequences.Keyboard > 0 {
+		var loadErr error
+
+		keyboardLayoutTables, loadErr = rules.LoadKeyboardLayoutFiles(cfg.Policy.Forbid.Sequences.Layouts)
+		if loadErr != nil {
+			return Prepared{}, fmt.Errorf("prepare keyboard layouts: %w", loadErr)
+		}
+	}
+
 	if err := ctx.Err(); err != nil {
 		return Prepared{}, fmt.Errorf("prepare policy: %w", err)
 	}
 
 	ruleOptions := rules.Options{
-		RepeatRun:        cfg.Policy.Forbid.RepeatRun,
-		RepeatTotal:      cfg.Policy.Forbid.RepeatTotal,
-		AlphabetSequence: cfg.Policy.Forbid.Sequences.Alphabet,
-		KeyboardSequence: cfg.Policy.Forbid.Sequences.Keyboard,
-		KeyboardLayouts:  append([]string(nil), cfg.Policy.Forbid.Sequences.Layouts...),
+		RepeatRun:            cfg.Policy.Forbid.RepeatRun,
+		RepeatTotal:          cfg.Policy.Forbid.RepeatTotal,
+		AlphabetSequence:     cfg.Policy.Forbid.Sequences.Alphabet,
+		KeyboardSequence:     cfg.Policy.Forbid.Sequences.Keyboard,
+		KeyboardLayouts:      append([]string(nil), cfg.Policy.Forbid.Sequences.Layouts...),
+		KeyboardLayoutTables: keyboardLayoutTables,
 
 		Dictionary: matcher,
 

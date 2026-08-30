@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Ahed11/password-policy/internal/policy"
+	"github.com/Ahed11/password-policy/internal/rules"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -139,6 +140,57 @@ func TestPrepareCanceledContext(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.ErrorIs(t, err, context.Canceled)
+
+	assert.Equal(t, Prepared{}, prepared)
+}
+
+func TestPrepareLoadsCustomKeyboardLayout(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "custom-layout.txt")
+
+	err := os.WriteFile(path, []byte("12345\nabcde\n"), 0o600)
+	require.NoError(t, err)
+
+	cfg := prepareTestConfig()
+
+	cfg.Policy.Forbid.Sequences.Alphabet = 0
+
+	cfg.Policy.Forbid.Sequences.Layouts = []string{path}
+
+	prepared, err := Prepare(context.Background(), cfg, PrepareOptions{})
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		[][]rune{
+			[]rune("12345"),
+			[]rune("abcde"),
+		},
+		prepared.Rules.KeyboardLayoutTables[path],
+	)
+
+	violations, err := rules.Check([]byte("123"), prepared.Rules)
+	require.NoError(t, err)
+
+	require.Len(t, violations, 1)
+
+	assert.Equal(t, "sequences.keyboard", violations[0].Rule)
+	assert.Equal(t, 0, violations[0].Offset)
+	assert.Equal(t, 3, violations[0].Length)
+	assert.Equal(t, path, violations[0].Layout)
+}
+
+func TestPrepareCustomKeyboardLayoutError(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "missing-layout.txt")
+
+	cfg := prepareTestConfig()
+
+	cfg.Policy.Forbid.Sequences.Layouts = []string{path}
+
+	prepared, err := Prepare(context.Background(), cfg, PrepareOptions{})
+
+	assert.Error(t, err)
+	assert.ErrorContains(t, err, "prepare keyboard layouts")
+	assert.ErrorContains(t, err, "missing-layout.txt")
 
 	assert.Equal(t, Prepared{}, prepared)
 }

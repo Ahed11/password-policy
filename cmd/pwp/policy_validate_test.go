@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -313,6 +314,115 @@ func TestPolicyUnknownSubcommand(t *testing.T) {
 	assert.Empty(t, stdout.String())
 
 	assert.Contains(t, stderr.String(), `unknown command "unknown"`)
+}
+
+func TestPolicyValidateCustomKeyboardLayout(t *testing.T) {
+	tempDir := t.TempDir()
+
+	layoutPath := filepath.Join(tempDir, "custom-layout.txt")
+
+	err := os.WriteFile(layoutPath, []byte("12345\nabcde\n"), 0o600)
+	require.NoError(t, err)
+
+	policyPath := filepath.Join(tempDir, "policy.yaml")
+
+	policyContent := fmt.Sprintf(
+		`version: 1
+policy:
+  name: custom-layout-policy
+  length:
+    min: 3
+    max: 3
+  classes:
+    - name: symbols
+      alphabet: "12345"
+  forbid:
+    sequences:
+      keyboard: 3
+      layouts:
+        - %q
+`,
+		filepath.ToSlash(layoutPath),
+	)
+
+	err = os.WriteFile(policyPath, []byte(policyContent), 0o600)
+	require.NoError(t, err)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"policy",
+			"validate",
+			"--policy",
+			policyPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitSuccess, code)
+
+	assert.Contains(t, stdout.String(), "policy is valid")
+
+	assert.Empty(t, stderr.String())
+}
+
+func TestPolicyValidateMissingCustomKeyboardLayout(t *testing.T) {
+	tempDir := t.TempDir()
+
+	layoutPath := filepath.Join(tempDir, "missing-layout.txt")
+
+	policyPath := filepath.Join(tempDir, "policy.yaml")
+
+	policyContent := fmt.Sprintf(
+		`version: 1
+policy:
+  name: missing-layout-policy
+  length:
+    min: 3
+    max: 3
+  classes:
+    - name: symbols
+      alphabet: "12345"
+  forbid:
+    sequences:
+      keyboard: 3
+      layouts:
+        - %q
+`,
+		filepath.ToSlash(layoutPath),
+	)
+
+	err := os.WriteFile(policyPath, []byte(policyContent), 0o600)
+	require.NoError(t, err)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"policy",
+			"validate",
+			"--policy",
+			policyPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "prepare keyboard layouts")
+
+	assert.Contains(t, stderr.String(), "missing-layout.txt")
 }
 
 func writePolicyValidateTestFile(t *testing.T, name string, content string) string {

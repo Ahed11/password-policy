@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -596,6 +597,125 @@ func TestContextValuesFlagEmptyValue(t *testing.T) {
 	assert.Error(t, err)
 
 	assert.Empty(t, values.values)
+}
+
+func TestCheckCustomKeyboardLayoutFromPolicyFile(t *testing.T) {
+	tempDir := t.TempDir()
+
+	layoutPath := filepath.Join(tempDir, "custom-layout.txt")
+
+	err := os.WriteFile(layoutPath, []byte("12345\nabcde\n"), 0o600)
+	require.NoError(t, err)
+
+	policyPath := filepath.Join(tempDir, "policy.yaml")
+
+	policyContent := fmt.Sprintf(
+		`version: 1
+policy:
+  name: custom-layout-policy
+  length:
+    min: 3
+    max: 3
+  classes:
+    - name: symbols
+      alphabet: "12345"
+      min: 0
+  forbid:
+    sequences:
+      keyboard: 3
+      layouts:
+        - %q
+`,
+		filepath.ToSlash(layoutPath),
+	)
+
+	err = os.WriteFile(policyPath, []byte(policyContent), 0o600)
+	require.NoError(t, err)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("123\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitFailure, code)
+
+	assert.Contains(t, stdout.String(), "sequences.keyboard FAILED at offset 0, length 3")
+
+	assert.Contains(t, stdout.String(), "custom-layout.txt")
+
+	assert.Empty(t, stderr.String())
+}
+
+func TestCheckMissingCustomKeyboardLayoutFile(t *testing.T) {
+	tempDir := t.TempDir()
+
+	layoutPath := filepath.Join(tempDir, "missing-layout.txt")
+
+	policyPath := filepath.Join(tempDir, "policy.yaml")
+
+	policyContent := fmt.Sprintf(
+		`version: 1
+policy:
+  name: missing-layout-policy
+  length:
+    min: 3
+    max: 3
+  classes:
+    - name: symbols
+      alphabet: "12345"
+      min: 0
+  forbid:
+    sequences:
+      keyboard: 3
+      layouts:
+        - %q
+`,
+		filepath.ToSlash(layoutPath),
+	)
+
+	err := os.WriteFile(policyPath, []byte(policyContent), 0o600)
+	require.NoError(t, err)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("123\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "prepare keyboard layouts")
+
+	assert.Contains(t, stderr.String(), "missing-layout.txt")
 }
 
 func writeCheckTestPolicy(t *testing.T) string {
