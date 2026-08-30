@@ -261,7 +261,7 @@ func normalizeNewlines(data []byte) []byte {
 	return bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
 }
 
-func demonstrateHistoryExhausted(buildDir string) error {
+func demonstrateHistoryExhausted(buildDir string) (err error) {
 	fmt.Println()
 	fmt.Println("== Demonstrate history_exhausted ==")
 
@@ -275,6 +275,10 @@ func demonstrateHistoryExhausted(buildDir string) error {
 	if err != nil {
 		return fmt.Errorf("open history-exhausted store: %w", err)
 	}
+
+	defer func() {
+		err = errors.Join(err, store.Close())
+	}()
 
 	password := []byte{'a'}
 	defer secret.Zero(password)
@@ -298,8 +302,6 @@ func demonstrateHistoryExhausted(buildDir string) error {
 	}
 
 	if err := store.Save(record); err != nil {
-		_ = store.Close()
-
 		return fmt.Errorf("seed history-exhausted store: %w", err)
 	}
 
@@ -314,8 +316,6 @@ func demonstrateHistoryExhausted(buildDir string) error {
 	)
 
 	if len(diagnostics) != 0 {
-		_ = store.Close()
-
 		return fmt.Errorf("build history-exhausted alphabet: %v", diagnostics)
 	}
 
@@ -345,11 +345,6 @@ func demonstrateHistoryExhausted(buildDir string) error {
 			PolicyVersion: "demo-version-1",
 		},
 	)
-
-	closeErr := store.Close()
-	if closeErr != nil {
-		return fmt.Errorf("close history-exhausted store: %w", closeErr)
-	}
 
 	if !errors.Is(issueErr, issue.ErrHistoryExhausted) {
 		return fmt.Errorf("expected history_exhausted, got %v", issueErr)

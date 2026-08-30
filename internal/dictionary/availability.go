@@ -1,21 +1,26 @@
 package dictionary
 
 import (
+	"errors"
 	"fmt"
 	"os"
 )
 
 // CheckAvailability проверяет доступность и читаемость файла словаря.
-func CheckAvailability(path string) error {
+func CheckAvailability(path string) (err error) {
 	if path == "" {
 		return nil
 	}
 
-	file, err := os.Open(path)
+	var file *os.File
+
+	file, err = os.Open(path)
 	if err != nil {
 		return fmt.Errorf("dictionary path %q cannot be opened: %w", path, err)
 	}
-	defer file.Close()
+	defer func() {
+		err = errors.Join(err, file.Close())
+	}()
 
 	info, err := file.Stat()
 	if err != nil {

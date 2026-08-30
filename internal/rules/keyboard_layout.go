@@ -2,6 +2,7 @@ package rules
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"unicode/utf8"
@@ -41,13 +42,15 @@ func getKeyboardLayout(name string) (keyboardLayout, bool) {
 	}
 }
 
-func loadKeyboardLayoutFile(path string) (keyboardLayout, error) {
+func loadKeyboardLayoutFile(path string) (layout keyboardLayout, err error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return keyboardLayout{}, fmt.Errorf("open keyboard layout file %q: %w", path, err)
 	}
 
-	defer file.Close()
+	defer func() {
+		err = errors.Join(err, file.Close())
+	}()
 
 	rows := make([][]rune, 0)
 

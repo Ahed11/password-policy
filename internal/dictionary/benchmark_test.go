@@ -2,6 +2,7 @@ package dictionary
 
 import (
 	"bufio"
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -103,14 +104,14 @@ func writeBenchmarkDictionary(b *testing.B, wordCount int) string {
 		word = append(word, '\n')
 
 		if _, err := writer.Write(word); err != nil {
-			_ = file.Close()
+			err = errors.Join(err, file.Close())
 
 			b.Fatalf("write benchmark dictionary: %v", err)
 		}
 	}
 
 	if err := writer.Flush(); err != nil {
-		_ = file.Close()
+		err = errors.Join(err, file.Close())
 
 		b.Fatalf("flush benchmark dictionary: %v", err)
 	}
