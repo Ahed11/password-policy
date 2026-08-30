@@ -459,6 +459,7 @@ func defaultPWPPath() string {
 
 type zeroSource struct{}
 
+// Read заполняет переданный буфер детерминированными байтами для воспроизводимого demo-сценария.
 func (zeroSource) Read(data []byte) (int, error) {
 	for i := range data {
 		data[i] = 0

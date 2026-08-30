@@ -8,6 +8,7 @@ import (
 	"github.com/Ahed11/password-policy/internal/random"
 )
 
+// Sample генерирует кандидат пароля без применения правил отбраковки и возвращает количество использованных попыток.
 func Sample(source random.Source, buildResult alphabet.BuildResult, options Options) (Result, error) {
 	if options.Attempts <= 0 {
 		return Result{}, fmt.Errorf("attempts must be greater than zero, got %d", options.Attempts)

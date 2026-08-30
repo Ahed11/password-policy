@@ -2,17 +2,20 @@ package dictionary
 
 import "fmt"
 
+// Match описывает найденное совпадение со словарным словом.
 type Match struct {
 	Offset int
 	Length int
 }
 
+// Matcher хранит подготовленную структуру для поиска словарных совпадений.
 type Matcher struct {
 	tree            *trie
 	caseInsensitive bool
 	leet            bool
 }
 
+// Load загружает словарь из файла и создаёт структуру для последующего поиска.
 func Load(path string, minLength int, caseInsensitive bool, leet bool) (*Matcher, error) {
 	words, err := readWords(path, minLength, caseInsensitive)
 	if err != nil {
@@ -26,6 +29,7 @@ func Load(path string, minLength int, caseInsensitive bool, leet bool) (*Matcher
 	}, nil
 }
 
+// Find ищет словарное совпадение в переданном значении.
 func (m *Matcher) Find(password []byte) []Match {
 	if m == nil {
 		return nil

@@ -2,21 +2,25 @@ package alphabet
 
 import "sort"
 
+// ClassDefinition описывает именованный класс символов до нормализации.
 type ClassDefinition struct {
 	Name     string
 	Alphabet string
 }
 
+// Class описывает нормализованный класс символов.
 type Class struct {
 	Name     string
 	Alphabet []rune
 }
 
+// BuildResult содержит нормализованные классы и их объединённый алфавит.
 type BuildResult struct {
 	Classes []Class
 	Union   []rune
 }
 
+// Build проверяет и нормализует определения классов, применяет исключения и строит объединённый алфавит.
 func Build(definitions []ClassDefinition, exclude string) (BuildResult, []error) {
 	internalDefinitions := make([]classDefinition, 0, len(definitions))
 

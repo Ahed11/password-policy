@@ -12,8 +12,10 @@ import (
 	"github.com/Ahed11/password-policy/internal/secret"
 )
 
+// ErrPoolStopped возвращается при попытке использовать остановленный пул.
 var ErrPoolStopped = errors.New("issue_pool_stopped")
 
+// PoolItem содержит предварительно сгенерированный пароль и версию конфигурации, по которой он был создан.
 type PoolItem struct {
 	Password []byte
 	Attempts int
@@ -25,6 +27,7 @@ type poolEvent struct {
 	version uint64
 }
 
+// Pool управляет ограниченным буфером предварительно сгенерированных паролей.
 type Pool struct {
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -41,6 +44,7 @@ type Pool struct {
 	stopDone chan struct{}
 }
 
+// NewPool создаёт и запускает пул предварительной генерации паролей.
 func NewPool(parent context.Context, source random.Source, buildResult alphabet.BuildResult, options generate.Options, size int) (*Pool, error) {
 	if parent == nil {
 		return nil, fmt.Errorf("create issue pool: context must not be nil")
@@ -92,6 +96,7 @@ func NewPool(parent context.Context, source random.Source, buildResult alphabet.
 	return pool, nil
 }
 
+// Get получает следующий готовый пароль из пула.
 func (p *Pool) Get(ctx context.Context) (PoolItem, error) {
 	if p == nil {
 		return PoolItem{}, fmt.Errorf("get password from issue pool: pool must not be nil")
@@ -151,6 +156,7 @@ func (p *Pool) Get(ctx context.Context) (PoolItem, error) {
 	}
 }
 
+// Stop останавливает пул, дожидается фоновой генерации и затирает невыданные пароли.
 func (p *Pool) Stop() {
 	if p == nil {
 		return

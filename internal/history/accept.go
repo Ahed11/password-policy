@@ -9,6 +9,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// Accept атомарно проверяет пароль по защищённому окну истории и сохраняет новую запись, если повторное использование не обнаружено.
 func (s *Store) Accept(subject string, password []byte, metadata Metadata, record Record) (bool, error) {
 	if s == nil || s.db == nil {
 		return false, fmt.Errorf("accept history record: store is not open")

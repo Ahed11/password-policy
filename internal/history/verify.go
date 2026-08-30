@@ -10,17 +10,20 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// VerifyIssue описывает одну проблему целостности, найденную в записи истории.
 type VerifyIssue struct {
 	Key     string `json:"key"`
 	Subject string `json:"subject,omitempty"`
 	Message string `json:"message"`
 }
 
+// VerifyResult содержит итог проверки целостности history store.
 type VerifyResult struct {
 	Checked int           `json:"checked"`
 	Issues  []VerifyIssue `json:"issues"`
 }
 
+// Verify проверяет записи history store и возвращает найденные проблемы целостности.
 func (s *Store) Verify() (VerifyResult, error) {
 	if s == nil || s.db == nil {
 		return VerifyResult{}, fmt.Errorf("verify history: store is not open")

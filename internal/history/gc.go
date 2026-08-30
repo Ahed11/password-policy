@@ -10,11 +10,13 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// GCResult содержит количество удалённых и сохранённых записей после очистки истории.
 type GCResult struct {
 	Deleted int
 	Kept    int
 }
 
+// GC удаляет устаревшие записи истории, сохраняя записи, необходимые для защищённого окна.
 func (s *Store) GC(now time.Time, ttl time.Duration, window int) (GCResult, error) {
 	if s == nil || s.db == nil {
 		return GCResult{}, fmt.Errorf("gc history: store is not open")

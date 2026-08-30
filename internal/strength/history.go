@@ -6,8 +6,10 @@ import (
 	"math"
 )
 
+// ErrHistoryWindowTooNarrow возвращается, когда энтропии политики недостаточно для настроенного окна истории.
 var ErrHistoryWindowTooNarrow = errors.New("policy is too narrow for history window")
 
+// RequiredHistoryEntropy вычисляет минимальную энтропию, необходимую для заданного размера окна истории.
 func RequiredHistoryEntropy(window int) (float64, error) {
 	if window < 0 {
 		return 0, fmt.Errorf("history window must not be negative, got %d", window)
@@ -20,6 +22,7 @@ func RequiredHistoryEntropy(window int) (float64, error) {
 	return math.Log2(float64(window)) + 10, nil
 }
 
+// CheckHistoryWindow проверяет достаточность нижней границы энтропии для заданного окна истории.
 func CheckHistoryWindow(bits float64, window int) error {
 	required, err := RequiredHistoryEntropy(window)
 	if err != nil {

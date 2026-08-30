@@ -19,10 +19,12 @@ type contextValuesFlag struct {
 	values []string
 }
 
+// String возвращает строковое представление переданных значений контекста.
 func (f *contextValuesFlag) String() string {
 	return ""
 }
 
+// Set разбирает и добавляет значение контекста из аргумента командной строки.
 func (f *contextValuesFlag) Set(value string) error {
 	key, contextValue, ok := strings.Cut(value, "=")
 

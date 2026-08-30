@@ -10,6 +10,7 @@ import (
 	"github.com/Ahed11/password-policy/internal/secret"
 )
 
+// AttemptResult содержит результат одной попытки генерации и признак принятия кандидата.
 type AttemptResult struct {
 	Password []byte
 	Accepted bool
@@ -60,6 +61,7 @@ func generateAttempt(source random.Source, minLength int, maxLength int, classes
 	}, attemptStageNone, nil
 }
 
+// GenerateAttempt выполняет одну попытку генерации кандидата и проверяет его по правилам политики.
 func GenerateAttempt(source random.Source, buildResult alphabet.BuildResult, options Options) (AttemptResult, error) {
 	if source == nil {
 		return AttemptResult{}, fmt.Errorf("generate attempt: random source must not be nil")

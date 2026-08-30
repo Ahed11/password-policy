@@ -10,8 +10,10 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// RotationReasonExpired обозначает ротацию из-за истечения срока действия пароля.
 const RotationReasonExpired = "expired"
 
+// RotationItem описывает одну запись в плане ротации паролей.
 type RotationItem struct {
 	Subject   string    `json:"subject"`
 	IssuedAt  time.Time `json:"issued_at"`
@@ -19,11 +21,13 @@ type RotationItem struct {
 	Reason    string    `json:"reason"`
 }
 
+// RotationPlan содержит список субъектов, которым требуется ротация, и предупреждения.
 type RotationPlan struct {
 	Items    []RotationItem `json:"items"`
 	Warnings []string       `json:"warnings"`
 }
 
+// PlanRotation строит план ротации паролей для указанного момента времени.
 func (s *Store) PlanRotation(now time.Time) (RotationPlan, error) {
 	if s == nil || s.db == nil {
 		return RotationPlan{}, fmt.Errorf("plan rotation: store is not open")

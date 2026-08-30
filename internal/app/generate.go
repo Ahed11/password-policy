@@ -9,11 +9,13 @@ import (
 	"github.com/Ahed11/password-policy/internal/secret"
 )
 
+// GenerationResult содержит сгенерированный пароль и количество использованных попыток.
 type GenerationResult struct {
 	Password []byte
 	Attempts int
 }
 
+// Generate создаёт заданное количество паролей по подготовленной политике.
 func Generate(ctx context.Context, source random.Source, prepared Prepared, count int) ([]GenerationResult, error) {
 	if ctx == nil {
 		return nil, fmt.Errorf("generate passwords: context must not be nil")

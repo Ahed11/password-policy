@@ -10,6 +10,7 @@ import (
 	"github.com/Ahed11/password-policy/internal/random"
 )
 
+// Estimate содержит рассчитанную нижнюю границу энтропии политики и данные использованной выборки.
 type Estimate struct {
 	Bits          float64
 	Outcomes      *big.Int
@@ -18,6 +19,7 @@ type Estimate struct {
 	RejectionRate float64
 }
 
+// EstimateEntropy вычисляет нижнюю границу энтропии политики с учётом оценочной доли отклонённых кандидатов.
 func EstimateEntropy(source random.Source, buildResult alphabet.BuildResult, options generate.Options) (Estimate, error) {
 	outcomes, err := countOutcomes(buildResult, options.MinLength, options.MaxLength, options.ClassMinimums, options.Rules.RepeatTotal)
 	if err != nil {

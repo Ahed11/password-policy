@@ -14,14 +14,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Format определяет формат файла политики.
 type Format int
 
+// Поддерживаемые форматы файлов политики.
 const (
 	FormatUnknown Format = iota
 	FormatYAML
 	FormatJSON
 )
 
+// LoadConfig загружает конфигурацию политики из файла, применяет значения по умолчанию и выполняет её проверку.
 func LoadConfig(path string) (Config, error) {
 	data, format, readErr := ReadPolicyFile(path)
 	if readErr != nil {
@@ -63,6 +66,7 @@ func LoadConfig(path string) (Config, error) {
 	return config, nil
 }
 
+// ReadPolicyFile читает файл политики и декодирует его в конфигурацию с учётом определённого формата.
 func ReadPolicyFile(path string) ([]byte, Format, error) {
 	data, err := os.ReadFile(path)
 

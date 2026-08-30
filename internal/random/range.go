@@ -57,6 +57,7 @@ func readRandomValue(source Source, byteCount int) (uint64, error) {
 	return value, nil
 }
 
+// Range возвращает равномерно распределённое случайное значение из диапазона [0, n) без modulo bias.
 func Range(source Source, n int) (int, error) {
 	if n <= 0 {
 		return 0, fmt.Errorf("random range size must be greater than 0")

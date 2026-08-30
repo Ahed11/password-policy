@@ -8,6 +8,7 @@ import (
 
 const auditReportVersion = 1
 
+// AuditReport содержит полный результат аудита паролей.
 type AuditReport struct {
 	ReportVersion int              `json:"report_version"`
 	Policy        string           `json:"policy"`
@@ -16,23 +17,27 @@ type AuditReport struct {
 	Subjects      []AuditSubject   `json:"subjects"`
 }
 
+// AuditTotals содержит общее количество проверенных, прошедших и не прошедших аудит записей.
 type AuditTotals struct {
 	Checked int `json:"checked"`
 	Passed  int `json:"passed"`
 	Failed  int `json:"failed"`
 }
 
+// ViolationCount содержит количество нарушений для отдельного правила.
 type ViolationCount struct {
 	Rule  string `json:"rule"`
 	Count int    `json:"count"`
 }
 
+// AuditSubject содержит результат аудита отдельного субъекта.
 type AuditSubject struct {
 	Subject string   `json:"subject"`
 	Passed  bool     `json:"passed"`
 	Rules   []string `json:"rules"`
 }
 
+// BuildAudit формирует детерминированный отчёт аудита из результатов проверки субъектов.
 func BuildAudit(result app.AuditResult) AuditReport {
 	report := AuditReport{
 		ReportVersion: auditReportVersion,

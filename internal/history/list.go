@@ -14,6 +14,7 @@ type storedRecord struct {
 	record Record
 }
 
+// List возвращает записи истории для указанного субъекта.
 func (s *Store) List(subject string) ([]Record, error) {
 	if s == nil || s.db == nil {
 		return nil, fmt.Errorf("list history records: store is not open")

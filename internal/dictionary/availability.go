@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// CheckAvailability проверяет доступность и читаемость файла словаря.
 func CheckAvailability(path string) error {
 	if path == "" {
 		return nil

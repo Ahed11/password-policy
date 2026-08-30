@@ -12,10 +12,12 @@ import (
 	"github.com/Ahed11/password-policy/internal/rules"
 )
 
+// PrepareOptions задаёт дополнительные параметры подготовки политики.
 type PrepareOptions struct {
 	ContextValues []string
 }
 
+// Prepared содержит предварительно обработанные данные политики, готовые к генерации и проверке паролей.
 type Prepared struct {
 	Config        policy.Config
 	Alphabet      alphabet.BuildResult
@@ -24,6 +26,7 @@ type Prepared struct {
 	Generate      generate.Options
 }
 
+// Prepare подготавливает политику к использованию: строит алфавит, загружает словарь и формирует параметры правил и генерации.
 func Prepare(ctx context.Context, cfg policy.Config, options PrepareOptions) (Prepared, error) {
 	if ctx == nil {
 		return Prepared{}, fmt.Errorf("prepare policy: context must not be nil")

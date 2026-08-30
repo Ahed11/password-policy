@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// MarshalJSON сериализует отчёт аудита в JSON.
 func MarshalJSON(report AuditReport) ([]byte, error) {
 	data, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {

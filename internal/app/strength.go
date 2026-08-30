@@ -8,6 +8,7 @@ import (
 	"github.com/Ahed11/password-policy/internal/strength"
 )
 
+// EvaluateStrength оценивает нижнюю границу энтропии подготовленной политики и проверяет её достаточность для настроенного окна истории.
 func EvaluateStrength(ctx context.Context, source random.Source, prepared Prepared) (strength.Estimate, error) {
 	if ctx == nil {
 		return strength.Estimate{}, fmt.Errorf("evaluate strength: context must not be nil")

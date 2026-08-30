@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 )
 
+// Write атомарно записывает данные в файл с указанными правами доступа.
 func Write(path string, data []byte, perm fs.FileMode) (returnErr error) {
 	if path == "" {
 		return fmt.Errorf("atomic write: path must not be empty")

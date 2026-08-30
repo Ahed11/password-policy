@@ -47,6 +47,7 @@ func parsePolicyDuration(input string) (time.Duration, error) {
 	return time.Duration(value) * unit, nil
 }
 
+// ValidatePolicy проверяет корректность и разрешимость конфигурации политики и возвращает найденные ошибки.
 func ValidatePolicy(config Config) []error {
 	var errors []error
 

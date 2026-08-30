@@ -14,6 +14,7 @@ type poolConfig struct {
 	version     uint64
 }
 
+// Reload заменяет конфигурацию пула и удаляет пароли, созданные по предыдущей версии политики.
 func (p *Pool) Reload(buildResult alphabet.BuildResult, options generate.Options) error {
 	if p == nil {
 		return fmt.Errorf("reload issue pool: pool must not be nil")

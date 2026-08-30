@@ -2,6 +2,7 @@ package random
 
 import "fmt"
 
+// Shuffle перемешивает элементы с помощью алгоритма Fisher-Yates и переданного источника случайности.
 func Shuffle(source Source, n int, swap func(i, j int)) error {
 	if n < 0 {
 		return fmt.Errorf("shuffle size must be greater than or equal to 0")

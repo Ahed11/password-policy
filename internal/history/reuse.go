@@ -2,6 +2,7 @@ package history
 
 import "fmt"
 
+// Reused проверяет, совпадает ли кандидат с одной из защищённых записей истории.
 func (s *Store) Reused(subject string, password []byte, window int) (bool, error) {
 	if window < 0 {
 		return false, fmt.Errorf("check password reuse: history window must not be negative, got %d", window)

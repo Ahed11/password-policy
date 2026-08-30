@@ -2,6 +2,7 @@ package history
 
 import "time"
 
+// Record содержит сохранённые данные одной выдачи пароля.
 type Record struct {
 	Subject       string    `json:"subject"`
 	Salt          []byte    `json:"salt"`

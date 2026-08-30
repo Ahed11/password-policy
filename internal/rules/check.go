@@ -6,6 +6,7 @@ import (
 	"github.com/Ahed11/password-policy/internal/dictionary"
 )
 
+// Violation описывает одно нарушение правила пароля с указанием позиции и длины.
 type Violation struct {
 	Rule   string
 	Offset int
@@ -13,6 +14,7 @@ type Violation struct {
 	Layout string
 }
 
+// Options задаёт параметры проверки правил пароля.
 type Options struct {
 	RepeatRun        int
 	RepeatTotal      bool
@@ -28,6 +30,7 @@ type Options struct {
 	ContextLeet            bool
 }
 
+// Check проверяет пароль по настроенным правилам и возвращает найденные нарушения.
 func Check(password []byte, options Options) ([]Violation, error) {
 	var violations []Violation
 

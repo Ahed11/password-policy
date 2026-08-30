@@ -9,6 +9,7 @@ import (
 
 const auditReportFileMode = 0o600
 
+// WriteAudit атомарно записывает JSON- и HTML-версии отчёта аудита в указанные файлы.
 func WriteAudit(report AuditReport, jsonPath string, htmlPath string) error {
 	if jsonPath == "" {
 		return fmt.Errorf("write audit report: JSON path must not be empty")

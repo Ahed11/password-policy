@@ -8,6 +8,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// Save сохраняет новую запись истории в хранилище.
 func (s *Store) Save(record Record) error {
 	if s == nil || s.db == nil {
 		return fmt.Errorf("save history record: store is not open")

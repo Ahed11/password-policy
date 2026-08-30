@@ -7,12 +7,14 @@ import (
 	"github.com/Ahed11/password-policy/internal/rules"
 )
 
+// RuleExplanation содержит результат проверки отдельного правила и найденные нарушения.
 type RuleExplanation struct {
 	Rule       string
 	Passed     bool
 	Violations []rules.Violation
 }
 
+// Explanation содержит подробное объяснение результата проверки пароля.
 type Explanation struct {
 	Passed  bool
 	Length  rules.LengthResult
@@ -20,6 +22,7 @@ type Explanation struct {
 	Rules   []RuleExplanation
 }
 
+// Explain проверяет пароль по подготовленной политике и формирует подробное объяснение нарушений.
 func Explain(ctx context.Context, prepared Prepared, password []byte) (Explanation, error) {
 	if ctx == nil {
 		return Explanation{}, fmt.Errorf("explain password: context must not be nil")

@@ -7,6 +7,7 @@ import (
 	"github.com/Ahed11/password-policy/internal/rules"
 )
 
+// Check проверяет пароль по подготовленной политике и возвращает результат оценки правил.
 func Check(ctx context.Context, prepared Prepared, password []byte) (rules.Evaluation, error) {
 	if ctx == nil {
 		return rules.Evaluation{}, fmt.Errorf("check password: context must not be nil")

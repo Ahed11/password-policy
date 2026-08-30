@@ -9,8 +9,10 @@ import (
 	"github.com/Ahed11/password-policy/internal/random"
 )
 
+// SaltSize задаёт размер случайной соли для записей истории в байтах.
 const SaltSize = 16
 
+// GenerateSalt создаёт случайную соль для новой записи истории.
 func GenerateSalt(source random.Source) ([]byte, error) {
 	if source == nil {
 		return nil, fmt.Errorf("generate history salt: random source must not be nil")
@@ -25,6 +27,7 @@ func GenerateSalt(source random.Source) ([]byte, error) {
 	return salt, nil
 }
 
+// HashPassword вычисляет hash пароля с использованием переданной соли.
 func HashPassword(salt []byte, password []byte) []byte {
 	hasher := sha256.New()
 
@@ -34,6 +37,7 @@ func HashPassword(salt []byte, password []byte) []byte {
 	return hasher.Sum(nil)
 }
 
+// Matches проверяет, соответствует ли пароль hash, сохранённому в записи истории.
 func Matches(record Record, password []byte) bool {
 	calculated := HashPassword(record.Salt, password)
 

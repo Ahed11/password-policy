@@ -13,8 +13,10 @@ import (
 	"github.com/Ahed11/password-policy/internal/secret"
 )
 
+// ErrHistoryExhausted возвращается, когда все допустимые кандидаты отклонены из-за защищённого окна истории.
 var ErrHistoryExhausted = errors.New("history_exhausted")
 
+// Options задаёт параметры выдачи нового пароля.
 type Options struct {
 	Subject       string
 	HistoryWindow int
@@ -25,12 +27,14 @@ type Options struct {
 	PolicyVersion string
 }
 
+// Result содержит выданный пароль и созданную запись истории.
 type Result struct {
 	Password []byte
 	Attempts int
 	Record   history.Record
 }
 
+// Issue генерирует и выдаёт пароль субъекту с учётом политики и защищённого окна истории.
 func Issue(ctx context.Context, source random.Source, store *history.Store, buildResult alphabet.BuildResult, generateOptions generate.Options, options Options) (Result, error) {
 	if ctx == nil {
 		return Result{}, fmt.Errorf("issue password: context must not be nil")

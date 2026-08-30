@@ -9,6 +9,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// ErrMetadataNotFound возвращается, когда metadata истории отсутствуют в хранилище.
 var ErrMetadataNotFound = errors.New("history_metadata_not_found")
 
 var (
@@ -16,6 +17,7 @@ var (
 	metadataConfigKey = []byte("config")
 )
 
+// Metadata содержит параметры окна и срока хранения истории.
 type Metadata struct {
 	HistoryWindow int
 	HistoryTTL    time.Duration
@@ -26,6 +28,7 @@ type storedMetadata struct {
 	HistoryTTLNanos int64 `json:"history_ttl_ns"`
 }
 
+// SaveMetadata сохраняет metadata истории в хранилище.
 func (s *Store) SaveMetadata(metadata Metadata) error {
 	if s == nil || s.db == nil {
 		return fmt.Errorf("save history metadata: store is not open")
@@ -46,6 +49,7 @@ func (s *Store) SaveMetadata(metadata Metadata) error {
 	return nil
 }
 
+// LoadMetadata загружает metadata истории из хранилища.
 func (s *Store) LoadMetadata() (Metadata, error) {
 	if s == nil || s.db == nil {
 		return Metadata{}, fmt.Errorf("load history metadata: store is not open")

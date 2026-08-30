@@ -17,10 +17,12 @@ const (
 
 var recordsBucket = []byte("records")
 
+// Store представляет постоянное хранилище истории паролей.
 type Store struct {
 	db *bolt.DB
 }
 
+// Open открывает или создаёт хранилище истории в указанном каталоге.
 func Open(path string) (*Store, error) {
 	if path == "" {
 		return nil, fmt.Errorf("open history store: path must not be empty")
@@ -64,6 +66,7 @@ func Open(path string) (*Store, error) {
 	}, nil
 }
 
+// Close закрывает хранилище истории и освобождает связанные ресурсы.
 func (s *Store) Close() error {
 	if s == nil || s.db == nil {
 		return nil

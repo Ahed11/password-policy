@@ -14,21 +14,25 @@ import (
 	"github.com/Ahed11/password-policy/internal/secret"
 )
 
+// AuditOptions задаёт параметры выполнения аудита паролей.
 type AuditOptions struct {
 	Strict bool
 }
 
+// AuditSubject содержит результат проверки пароля отдельного субъекта.
 type AuditSubject struct {
 	Subject string
 	Passed  bool
 	Rules   []string
 }
 
+// AuditLineError описывает ошибку разбора отдельной строки входного JSONL.
 type AuditLineError struct {
 	Line    int
 	Message string
 }
 
+// AuditResult содержит итоговые результаты аудита паролей.
 type AuditResult struct {
 	Policy     string
 	Checked    int
@@ -38,6 +42,7 @@ type AuditResult struct {
 	LineErrors []AuditLineError
 }
 
+// Audit проверяет пароли из входного JSONL по подготовленной политике и возвращает результаты аудита.
 func Audit(ctx context.Context, input io.Reader, prepared Prepared, options AuditOptions) (AuditResult, error) {
 	if ctx == nil {
 		return AuditResult{}, fmt.Errorf("audit passwords: context must not be nil")
@@ -180,6 +185,7 @@ type auditRecord struct {
 
 type auditPassword []byte
 
+// UnmarshalJSON декодирует JSON-строку непосредственно в байтовое представление пароля.
 func (p *auditPassword) UnmarshalJSON(data []byte) error {
 	decoded, err := decodeJSONStringBytes(data)
 	if err != nil {

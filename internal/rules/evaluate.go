@@ -7,6 +7,7 @@ import (
 	"github.com/Ahed11/password-policy/internal/alphabet"
 )
 
+// LengthResult содержит результат проверки длины пароля.
 type LengthResult struct {
 	Count  int
 	Min    int
@@ -14,6 +15,7 @@ type LengthResult struct {
 	Passed bool
 }
 
+// ClassResult содержит результат проверки минимального количества символов отдельного класса.
 type ClassResult struct {
 	Name    string
 	Count   int
@@ -21,6 +23,7 @@ type ClassResult struct {
 	Passed  bool
 }
 
+// EvaluationOptions задаёт параметры полной оценки пароля по политике.
 type EvaluationOptions struct {
 	MinLength     int
 	MaxLength     int
@@ -28,6 +31,7 @@ type EvaluationOptions struct {
 	Rules         Options
 }
 
+// Evaluation содержит полный результат проверки пароля по длине, классам и правилам запретов.
 type Evaluation struct {
 	Passed     bool
 	Length     LengthResult
@@ -35,6 +39,7 @@ type Evaluation struct {
 	Violations []Violation
 }
 
+// Evaluate выполняет полную проверку пароля по заданным параметрам политики.
 func Evaluate(password []byte, buildResult alphabet.BuildResult, options EvaluationOptions) (Evaluation, error) {
 	if !utf8.Valid(password) {
 		return Evaluation{}, fmt.Errorf("password is not valid UTF-8")

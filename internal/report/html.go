@@ -150,6 +150,7 @@ const auditHTMLTemplate = `<!doctype html>
 </html>
 `
 
+// MarshalHTML сериализует отчёт аудита в HTML.
 func MarshalHTML(report AuditReport) ([]byte, error) {
 	tmpl, err := template.New("audit-report").Parse(auditHTMLTemplate)
 	if err != nil {
