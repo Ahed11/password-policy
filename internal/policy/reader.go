@@ -133,7 +133,6 @@ func decodePolicyData(data []byte, format Format) (Config, bool, error) {
 			decodeErrors := formatYAMLDecodeErrors(data, decodeErr)
 			formattedDecodeErr := errors.Join(decodeErrors...)
 
-
 			var typeErr *yaml.TypeError
 
 			if !errors.As(decodeErr, &typeErr) {
@@ -149,7 +148,7 @@ func decodePolicyData(data []byte, format Format) (Config, bool, error) {
 		if trailingErr == nil {
 			diagnostics = append(diagnostics, fmt.Errorf("YAML policy must contain exactly one document"))
 		} else if !errors.Is(trailingErr, io.EOF) {
-			diagnostics = append( diagnostics, fmt.Errorf("read trailing YAML data: %w", trailingErr))
+			diagnostics = append(diagnostics, fmt.Errorf("read trailing YAML data: %w", trailingErr))
 		}
 
 		if len(diagnostics) > 0 {
