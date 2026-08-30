@@ -1,0 +1,3271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Password Policy Audit Report</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #222;
+    }
+
+    h1, h2 {
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f3f3f3;
+    }
+
+    .passed {
+      font-weight: bold;
+    }
+
+    .failed {
+      font-weight: bold;
+    }
+
+    .rules {
+      margin: 0;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Password Policy Audit Report</h1>
+
+  <p>
+    <strong>Report version:</strong> 1<br>
+    <strong>Policy:</strong> demo-service-accounts
+  </p>
+
+  <h2>Totals</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Checked</th>
+        <th>Passed</th>
+        <th>Failed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>200</td>
+        <td>120</td>
+        <td>80</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Violations</h2>
+
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Rule</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td>class.digits</td>
+        <td>10</td>
+      </tr>
+      
+      <tr>
+        <td>class.special</td>
+        <td>10</td>
+      </tr>
+      
+      <tr>
+        <td>class.upper</td>
+        <td>10</td>
+      </tr>
+      
+      <tr>
+        <td>dictionary</td>
+        <td>10</td>
+      </tr>
+      
+      <tr>
+        <td>length</td>
+        <td>10</td>
+      </tr>
+      
+      <tr>
+        <td>repeat_run</td>
+        <td>10</td>
+      </tr>
+      
+      <tr>
+        <td>sequences.alphabet</td>
+        <td>10</td>
+      </tr>
+      
+      <tr>
+        <td>sequences.keyboard</td>
+        <td>10</td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+
+  <h2>Subjects</h2>
+
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Status</th>
+        <th>Rules</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td>pass-001</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-002</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-003</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-004</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-005</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-006</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-007</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-008</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-009</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-010</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-011</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-012</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-013</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-014</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-015</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-016</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-017</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-018</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-019</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-020</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-021</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-022</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-023</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-024</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-025</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-026</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-027</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-028</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-029</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-030</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-031</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-032</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-033</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-034</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-035</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-036</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-037</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-038</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-039</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-040</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-041</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-042</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-043</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-044</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-045</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-046</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-047</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-048</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-049</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-050</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-051</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-052</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-053</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-054</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-055</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-056</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-057</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-058</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-059</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-060</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-061</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-062</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-063</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-064</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-065</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-066</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-067</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-068</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-069</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-070</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-071</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-072</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-073</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-074</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-075</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-076</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-077</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-078</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-079</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-080</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-081</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-082</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-083</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-084</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-085</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-086</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-087</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-088</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-089</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-090</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-091</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-092</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-093</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-094</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-095</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-096</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-097</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-098</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-099</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-100</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-101</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-102</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-103</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-104</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-105</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-106</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-107</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-108</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-109</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-110</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-111</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-112</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-113</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-114</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-115</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-116</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-117</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-118</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-119</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>pass-120</td>
+        <td>
+          
+          <span class="passed">passed</span>
+          
+        </td>
+        <td>
+          
+          —
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-length-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>length</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-upper-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.upper</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-special-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.special</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-repeat-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>repeat_run</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-alphabet-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.alphabet</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-keyboard-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>sequences.keyboard</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-dictionary-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>dictionary</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-001</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-002</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-003</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-004</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-005</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-006</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-007</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-008</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-009</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>fail-digits-010</td>
+        <td>
+          
+          <span class="failed">failed</span>
+          
+        </td>
+        <td>
+          
+          <ul class="rules">
+            
+            <li>class.digits</li>
+            
+          </ul>
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+</body>
+</html>
