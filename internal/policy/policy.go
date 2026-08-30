@@ -29,7 +29,7 @@ type Forbid struct {
 	Context     Context    `yaml:"context" json:"context"`
 }
 
-// Forbid содержит правила, запрещающие определённые свойства и подстроки пароля.
+// Sequences задаёт параметры запрета алфавитных и клавиатурных последовательностей.
 type Sequences struct {
 	Alphabet int      `yaml:"alphabet" json:"alphabet"`
 	Keyboard int      `yaml:"keyboard" json:"keyboard"`
