@@ -21,6 +21,7 @@ func newDeterministicEntropySource() random.Source {
 	}
 }
 
+// Read заполняет p воспроизводимой последовательностью байтов для внутренней оценки энтропии.
 func (source *deterministicEntropySource) Read(p []byte) (int, error) {
 	written := 0
 
