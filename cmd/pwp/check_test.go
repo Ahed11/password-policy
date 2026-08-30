@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -716,6 +717,254 @@ policy:
 	assert.Contains(t, stderr.String(), "prepare keyboard layouts")
 
 	assert.Contains(t, stderr.String(), "missing-layout.txt")
+}
+
+func TestCheckControlIndividualRuleViolations(t *testing.T) {
+	controlDir := filepath.Join(
+		"..",
+		"..",
+		"testdata",
+		"control",
+	)
+
+	tests := []struct {
+		name         string
+		policy       string
+		password     string
+		extraArgs    []string
+		expectedLine string
+	}{
+		{
+			name:         "class_lower",
+			policy:       "valid_policy.yaml",
+			password:     "missing_lower.txt",
+			expectedLine: "class lower FAILED",
+		},
+		{
+			name:         "repeat_total",
+			policy:       "repeat_total_policy.yaml",
+			password:     "repeat_total.txt",
+			expectedLine: "repeat_total FAILED",
+		},
+		{
+			name:     "context",
+			policy:   "valid_policy.yaml",
+			password: "context.txt",
+			extraArgs: []string{
+				"--context",
+				"login=svc-01",
+			},
+			expectedLine: "context FAILED",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			policyPath := filepath.Join(controlDir, test.policy)
+
+			passwordPath := filepath.Join(controlDir, "passwords", test.password)
+
+			args := []string{"check", "--policy", policyPath, "--password-file", passwordPath}
+
+			args = append(args, test.extraArgs...)
+
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+
+			code := run(context.Background(), args, bytes.NewReader(nil), &stdout, &stderr)
+
+			assert.Equal(t, exitFailure, code)
+			assert.Empty(t, stderr.String())
+
+			assert.Contains(t, stdout.String(), test.expectedLine)
+
+			assert.Equal(t, 1, strings.Count(stdout.String(), "FAILED"), "control password must violate exactly one rule")
+		})
+	}
+}
+
+func TestCheckControlBoundaryPasswords(t *testing.T) {
+	controlDir := filepath.Join("..", "..", "testdata", "control")
+
+	policyPath := filepath.Join(controlDir, "valid_policy.yaml")
+
+	tests := []struct {
+		name     string
+		password string
+	}{
+		{
+			name:     "length_min",
+			password: "boundary_length_min.txt",
+		},
+		{
+			name:     "length_max",
+			password: "boundary_length_max.txt",
+		},
+		{
+			name:     "repeat_run_at_limit",
+			password: "boundary_repeat_run.txt",
+		},
+		{
+			name:     "alphabet_sequence_below_limit",
+			password: "boundary_alphabet_sequence.txt",
+		},
+		{
+			name:     "keyboard_sequence_below_limit",
+			password: "boundary_keyboard_sequence.txt",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			passwordPath := filepath.Join(controlDir, "passwords", test.password)
+
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+
+			code := run(
+				context.Background(),
+				[]string{
+					"check",
+					"--policy",
+					policyPath,
+					"--password-file",
+					passwordPath,
+				},
+				bytes.NewReader(nil),
+				&stdout,
+				&stderr,
+			)
+
+			assert.Equal(t, exitSuccess, code)
+			assert.Empty(t, stderr.String())
+
+			assert.Contains(t, stdout.String(), "password satisfies policy")
+		})
+	}
+}
+
+func TestCheckControlClassMinimumBoundaries(t *testing.T) {
+	controlDir := filepath.Join("..", "..", "testdata", "control")
+
+	policyPath := filepath.Join(controlDir, "valid_policy.yaml")
+
+	tests := []struct {
+		name     string
+		password string
+	}{
+		{
+			name:     "digits_at_minimum",
+			password: "boundary_class_digits.txt",
+		},
+		{
+			name:     "lower_at_minimum",
+			password: "boundary_class_lower.txt",
+		},
+		{
+			name:     "upper_at_minimum",
+			password: "boundary_class_upper.txt",
+		},
+		{
+			name:     "special_at_minimum",
+			password: "boundary_class_special.txt",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			passwordPath := filepath.Join(controlDir, "passwords", test.password)
+
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+
+			code := run(
+				context.Background(),
+				[]string{
+					"check",
+					"--policy",
+					policyPath,
+					"--password-file",
+					passwordPath,
+				},
+				bytes.NewReader(nil),
+				&stdout,
+				&stderr,
+			)
+
+			assert.Equal(t, exitSuccess, code)
+			assert.Empty(t, stderr.String())
+
+			assert.Contains(t, stdout.String(), "password satisfies policy")
+		})
+	}
+}
+
+func TestCheckControlSpecialBoundaries(t *testing.T) {
+	controlDir := filepath.Join("..", "..", "testdata", "control")
+
+	tests := []struct {
+		name         string
+		policy       string
+		password     string
+		extraArgs    []string
+		expectedCode int
+		expectedLine string
+	}{
+		{
+			name:         "repeat_total_one_occurrence",
+			policy:       "repeat_total_policy.yaml",
+			password:     "boundary_repeat_total.txt",
+			expectedCode: exitSuccess,
+			expectedLine: "password satisfies policy",
+		},
+		{
+			name:         "dictionary_below_min_length",
+			policy:       "dictionary_boundary_policy.yaml",
+			password:     "boundary_dictionary_below.txt",
+			expectedCode: exitSuccess,
+			expectedLine: "password satisfies policy",
+		},
+		{
+			name:         "dictionary_at_min_length",
+			policy:       "dictionary_boundary_policy.yaml",
+			password:     "boundary_dictionary_at.txt",
+			expectedCode: exitFailure,
+			expectedLine: "dictionary FAILED",
+		},
+		{
+			name:     "context_below_min_length",
+			policy:   "valid_policy.yaml",
+			password: "boundary_context_below.txt",
+			extraArgs: []string{
+				"--context",
+				"login=svc",
+			},
+			expectedCode: exitSuccess,
+			expectedLine: "password satisfies policy",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			policyPath := filepath.Join(controlDir, test.policy)
+
+			passwordPath := filepath.Join(controlDir, "passwords", test.password)
+
+			args := []string{"check", "--policy", policyPath, "--password-file", passwordPath}
+
+			args = append(args, test.extraArgs...)
+
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+
+			code := run(context.Background(), args, bytes.NewReader(nil), &stdout, &stderr)
+
+			assert.Equal(t, test.expectedCode, code)
+			assert.Empty(t, stderr.String())
+
+			assert.Contains(t, stdout.String(), test.expectedLine)
+		})
+	}
 }
 
 func writeCheckTestPolicy(t *testing.T) string {

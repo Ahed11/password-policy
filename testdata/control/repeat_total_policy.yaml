@@ -1,0 +1,59 @@
+version: 1
+
+policy:
+  name: control-repeat-total
+
+  length:
+    min: 16
+    max: 20
+
+  classes:
+    - name: digits
+      alphabet: "0123456789"
+      min: 2
+
+    - name: lower
+      alphabet: "abcdefghijklmnopqrstuvwxyz"
+      min: 2
+
+    - name: upper
+      alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      min: 2
+
+    - name: special
+      alphabet: '!@#$%^&*()-_=+[]{};:,.?'
+      min: 1
+
+  exclude: "lI1O0"
+
+  attempts: 100
+
+  forbid:
+    repeat_run: 2
+    repeat_total: true
+
+    sequences:
+      alphabet: 3
+      keyboard: 3
+      layouts:
+        - qwerty
+        - jcuken
+
+    dictionary:
+      path: ../../testdata/control/dict/common.txt
+      min_length: 4
+      case_insensitive: true
+      leet: true
+
+    context:
+      min_length: 3
+
+issue:
+  pool_size: 16
+  store: build/history
+
+  history:
+    window: 5
+    ttl: 180d
+
+  rotate_after: 90d

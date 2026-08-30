@@ -1052,6 +1052,54 @@ func TestWriteAuditSummaryNilWriter(t *testing.T) {
 	assert.ErrorContains(t, err, "writer must not be nil")
 }
 
+func TestAuditControlSet(t *testing.T) {
+	policyPath := filepath.Join("..", "..", "testdata", "control", "valid_policy.yaml")
+
+	inputPath := filepath.Join("..", "..", "testdata", "control", "passwords.jsonl")
+
+	expectedPath := filepath.Join("..", "..", "testdata", "control", "expected_audit.json")
+
+	outputDir := t.TempDir()
+
+	outputPath := filepath.Join(outputDir, "audit.json")
+
+	htmlPath := filepath.Join(outputDir, "audit.html")
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"audit",
+			"--policy",
+			policyPath,
+			"--input",
+			inputPath,
+			"--report",
+			outputPath,
+			"--report-html",
+			htmlPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitFailure, code)
+	assert.Empty(t, stderr.String())
+
+	assert.Contains(t, stdout.String(), "audit: checked=200 passed=120 failed=80 warnings=0")
+
+	actual, err := os.ReadFile(outputPath)
+	require.NoError(t, err)
+
+	expected, err := os.ReadFile(expectedPath)
+	require.NoError(t, err)
+
+	assert.Equal(t, string(expected), string(actual))
+}
+
 func writeAuditTestPolicy(t *testing.T) string {
 	t.Helper()
 
