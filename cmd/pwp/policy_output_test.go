@@ -100,7 +100,7 @@ policy:
     max: 20
   classes:
     - name: lower
-      alphabet: "abcdef"
+      alphabet: "abcdefghij"
       min: 2
     - name: digits
       alphabet: "0123456789"

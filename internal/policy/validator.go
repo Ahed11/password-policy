@@ -113,5 +113,7 @@ func ValidatePolicy(config Config) []error {
 		errors = append(errors, fmt.Errorf("policy.forbid.repeat_run: must be greater than or equal to 0"))
 	}
 
+	errors = append(errors, validateSolvability(config)...)
+
 	return errors
 }

@@ -276,6 +276,84 @@ func TestValidatePolicy(t *testing.T) {
 			},
 			wantErr: []string{},
 		},
+		{
+			name: "class_minimum_sum_exceeds_length_max",
+			modify: func(c *Config) {
+				c.Policy.Length.Min = 4
+				c.Policy.Length.Max = 5
+
+				c.Policy.Classes = []Class{
+					{
+						Name:     "digits",
+						Alphabet: "0123456789",
+						Min:      2,
+					},
+					{
+						Name:     "lower",
+						Alphabet: "abcdefghijklmnopqrstuvwxyz",
+						Min:      2,
+					},
+					{
+						Name:     "upper",
+						Alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+						Min:      2,
+					},
+				}
+			},
+			wantErr: []string{
+				"sum of class minimums is 6, length.max is 5",
+			},
+		},
+		{
+			name: "repeat_total_union_capacity_is_validated",
+			modify: func(c *Config) {
+				c.Policy.Length.Min = 5
+				c.Policy.Length.Max = 5
+
+				c.Policy.Classes = []Class{
+					{
+						Name:     "first",
+						Alphabet: "ab",
+						Min:      1,
+					},
+					{
+						Name:     "second",
+						Alphabet: "cd",
+						Min:      1,
+					},
+				}
+
+				c.Policy.Forbid.RepeatTotal = true
+			},
+			wantErr: []string{
+				"policy.length.max: value 5 exceeds union alphabet size 4",
+			},
+		},
+		{
+			name: "repeat_total_class_capacity_is_validated",
+			modify: func(c *Config) {
+				c.Policy.Length.Min = 4
+				c.Policy.Length.Max = 4
+
+				c.Policy.Classes = []Class{
+					{
+						Name:     "digits",
+						Alphabet: "01",
+						Min:      3,
+					},
+					{
+						Name:     "lower",
+						Alphabet: "abcd",
+						Min:      1,
+					},
+				}
+
+				c.Policy.Forbid.RepeatTotal = true
+			},
+			wantErr: []string{
+				`policy.classes["digits"].min: value 3 exceeds alphabet size 2`,
+			},
+		},
 	}
 
 	for _, test := range tests {
