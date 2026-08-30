@@ -1,0 +1,26 @@
+version: 1
+
+policy:
+  name: overlapping-classes
+
+  length:
+    min: 8
+    max: 12
+
+  classes:
+    - name: first
+      alphabet: "abcdef"
+      min: 2
+
+    - name: second
+      alphabet: "defghi"
+      min: 2
+
+  attempts: 20
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s

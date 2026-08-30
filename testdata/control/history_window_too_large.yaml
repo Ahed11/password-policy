@@ -1,0 +1,22 @@
+version: 1
+
+policy:
+  name: history-window-too-large
+
+  length:
+    min: 1
+    max: 1
+
+  classes:
+    - name: letters
+      alphabet: "ab"
+      min: 1
+
+  attempts: 20
+
+issue:
+  history:
+    window: 5
+    ttl: 180d
+
+  rotate_after: 90d

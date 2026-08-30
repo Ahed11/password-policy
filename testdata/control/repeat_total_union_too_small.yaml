@@ -1,0 +1,29 @@
+version: 1
+
+policy:
+  name: repeat-total-union-too-small
+
+  length:
+    min: 5
+    max: 5
+
+  classes:
+    - name: first
+      alphabet: "ab"
+      min: 1
+
+    - name: second
+      alphabet: "cd"
+      min: 1
+
+  attempts: 20
+
+  forbid:
+    repeat_total: true
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s

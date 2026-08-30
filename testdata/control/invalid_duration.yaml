@@ -1,0 +1,30 @@
+version: 1
+
+policy:
+  name: invalid-duration
+
+  length:
+    min: 8
+    max: 12
+
+  classes:
+    - name: digits
+      alphabet: "0123456789"
+      min: 1
+
+    - name: lower
+      alphabet: "abcdefghijklmnopqrstuvwxyz"
+      min: 1
+
+    - name: upper
+      alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      min: 1
+
+  attempts: 20
+
+issue:
+  history:
+    window: 2
+    ttl: 30days
+
+  rotate_after: 90d

@@ -1,0 +1,30 @@
+version: 1
+
+policy:
+  name: attempts-zero
+
+  length:
+    min: 8
+    max: 12
+
+  classes:
+    - name: digits
+      alphabet: "0123456789"
+      min: 1
+
+    - name: lower
+      alphabet: "abcdefghijklmnopqrstuvwxyz"
+      min: 1
+
+    - name: upper
+      alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      min: 1
+
+  attempts: 0
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s

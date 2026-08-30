@@ -1,0 +1,29 @@
+version: 1
+
+policy:
+  name: valid-boundary
+
+  length:
+    min: 4
+    max: 4
+
+  classes:
+    - name: digits
+      alphabet: "01"
+      min: 2
+
+    - name: lower
+      alphabet: "ab"
+      min: 2
+
+  attempts: 20
+
+  forbid:
+    repeat_total: true
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s

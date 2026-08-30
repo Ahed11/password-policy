@@ -1,0 +1,30 @@
+version: 1
+
+policy:
+  name: minimums-exceed-max
+
+  length:
+    min: 4
+    max: 5
+
+  classes:
+    - name: digits
+      alphabet: "0123456789"
+      min: 2
+
+    - name: lower
+      alphabet: "abcdefghijklmnopqrstuvwxyz"
+      min: 2
+
+    - name: upper
+      alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      min: 2
+
+  attempts: 20
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s

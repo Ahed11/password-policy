@@ -1,0 +1,28 @@
+version: 1
+
+policy:
+  name: empty-class-after-exclude
+
+  length:
+    min: 4
+    max: 8
+
+  classes:
+    - name: digits
+      alphabet: "0123"
+      min: 1
+
+    - name: special
+      alphabet: "!@#"
+      min: 1
+
+  exclude: "!@#"
+
+  attempts: 20
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s

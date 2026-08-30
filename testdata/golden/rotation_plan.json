@@ -1,0 +1,17 @@
+{
+  "items": [
+    {
+      "subject": "svc-01",
+      "issued_at": "2026-08-01T00:00:00Z",
+      "expires_at": "2026-10-30T00:00:00Z",
+      "reason": "expired"
+    },
+    {
+      "subject": "svc-03",
+      "issued_at": "2026-08-15T00:00:00Z",
+      "expires_at": "2026-11-13T00:00:00Z",
+      "reason": "expired"
+    }
+  ],
+  "warnings": []
+}

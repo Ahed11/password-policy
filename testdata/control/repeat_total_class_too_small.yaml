@@ -1,0 +1,29 @@
+version: 1
+
+policy:
+  name: repeat-total-class-too-small
+
+  length:
+    min: 4
+    max: 4
+
+  classes:
+    - name: digits
+      alphabet: "01"
+      min: 3
+
+    - name: lower
+      alphabet: "abcd"
+      min: 1
+
+  attempts: 20
+
+  forbid:
+    repeat_total: true
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s

@@ -1,0 +1,37 @@
+version: 1
+
+policy:
+  name: missing-dictionary
+
+  length:
+    min: 8
+    max: 12
+
+  classes:
+    - name: digits
+      alphabet: "0123456789"
+      min: 1
+
+    - name: lower
+      alphabet: "abcdefghijklmnopqrstuvwxyz"
+      min: 1
+
+    - name: upper
+      alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      min: 1
+
+  attempts: 20
+
+  forbid:
+    dictionary:
+      path: testdata/control/does-not-exist.txt
+      min_length: 4
+      case_insensitive: true
+      leet: false
+
+issue:
+  history:
+    window: 0
+    ttl: 0s
+
+  rotate_after: 0s
