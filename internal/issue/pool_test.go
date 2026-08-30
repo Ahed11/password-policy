@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"runtime"
 	"testing"
 
 	"github.com/Ahed11/password-policy/internal/alphabet"
@@ -267,6 +268,31 @@ func TestPoolStop(t *testing.T) {
 	assert.ErrorIs(t, err, ErrPoolStopped)
 
 	assert.Equal(t, PoolItem{}, item)
+}
+
+func TestPoolStopDoesNotLeakGoroutines(t *testing.T) {
+	baseline := runtime.NumGoroutine()
+
+	pool, err := NewPool(
+		context.Background(),
+		bytes.NewReader(nil),
+		poolTestBuildResult(),
+		poolTestGenerateOptions(1),
+		1,
+	)
+	require.NoError(t, err)
+
+	pool.Stop()
+
+	after := runtime.NumGoroutine()
+
+	for i := 0; i < 10_000 && after > baseline; i++ {
+		runtime.Gosched()
+
+		after = runtime.NumGoroutine()
+	}
+
+	assert.LessOrEqual(t, after, baseline)
 }
 
 func TestPoolStopTwice(t *testing.T) {
