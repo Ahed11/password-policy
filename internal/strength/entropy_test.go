@@ -268,3 +268,30 @@ func entropyTestOptions(ruleOptions rules.Options) generate.Options {
 		Rules: ruleOptions,
 	}
 }
+
+func TestEstimateEntropyDeterministicIsReproducible(t *testing.T) {
+	buildResult := entropyTestBuildResult()
+
+	options := entropyTestOptions(
+		rules.Options{
+			ContextValues:    []string{"a"},
+			ContextMinLength: 1,
+		},
+	)
+
+	first, err := EstimateEntropyDeterministic(buildResult, options)
+	require.NoError(t, err)
+
+	second, err := EstimateEntropyDeterministic(buildResult, options)
+	require.NoError(t, err)
+
+	assert.Equal(t, first.Bits, second.Bits)
+	assert.Equal(t, first.Samples, second.Samples)
+	assert.Equal(t, first.Rejected, second.Rejected)
+	assert.Equal(t, first.RejectionRate, second.RejectionRate)
+
+	require.NotNil(t, first.Outcomes)
+	require.NotNil(t, second.Outcomes)
+
+	assert.Zero(t, first.Outcomes.Cmp(second.Outcomes))
+}

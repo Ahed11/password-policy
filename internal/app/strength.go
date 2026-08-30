@@ -39,3 +39,34 @@ func EvaluateStrength(ctx context.Context, source random.Source, prepared Prepar
 
 	return estimate, nil
 }
+
+// EvaluateStrengthDeterministic воспроизводимо оценивает нижнюю границу энтропии подготовленной политики и проверяет её достаточность для настроенного окна истории.
+func EvaluateStrengthDeterministic(ctx context.Context, prepared Prepared) (strength.Estimate, error) {
+	if ctx == nil {
+		return strength.Estimate{}, fmt.Errorf("evaluate strength: context must not be nil")
+	}
+
+	if err := ctx.Err(); err != nil {
+		return strength.Estimate{}, fmt.Errorf("evaluate strength: %w", err)
+	}
+
+	estimate, err := strength.EstimateEntropyDeterministic(
+		prepared.Alphabet,
+		prepared.Generate,
+	)
+	if err != nil {
+		return strength.Estimate{}, fmt.Errorf("evaluate policy strength: %w", err)
+	}
+
+	if err := ctx.Err(); err != nil {
+		return strength.Estimate{}, fmt.Errorf("evaluate strength: %w", err)
+	}
+
+	window := prepared.Config.Issue.History.Window
+
+	if err := strength.CheckHistoryWindow(estimate.Bits, window); err != nil {
+		return estimate, fmt.Errorf("check history window solvability: %w", err)
+	}
+
+	return estimate, nil
+}

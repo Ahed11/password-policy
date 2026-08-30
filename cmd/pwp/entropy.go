@@ -9,7 +9,6 @@ import (
 
 	"github.com/Ahed11/password-policy/internal/app"
 	"github.com/Ahed11/password-policy/internal/policy"
-	"github.com/Ahed11/password-policy/internal/random"
 )
 
 func runEntropy(ctx context.Context, args []string, stdout io.Writer, stderr io.Writer) int {
@@ -72,9 +71,7 @@ func runEntropy(ctx context.Context, args []string, stdout io.Writer, stderr io.
 		return exitUsage
 	}
 
-	source := random.DefaultSource()
-
-	estimate, err := app.EvaluateStrength(ctx, source, prepared)
+	estimate, err := app.EvaluateStrengthDeterministic(ctx, prepared)
 	if err != nil {
 		fmt.Fprintf(stderr, "pwp entropy: %v\n", err)
 

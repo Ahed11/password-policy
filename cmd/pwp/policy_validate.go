@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	cryptorand "crypto/rand"
 	"errors"
 	"flag"
 	"fmt"
@@ -95,7 +94,7 @@ func runPolicyValidate(ctx context.Context, args []string, stdout io.Writer, std
 		return exitUsage
 	}
 
-	_, err = app.EvaluateStrength(ctx, cryptorand.Reader, prepared)
+	_, err = app.EvaluateStrengthDeterministic(ctx, prepared)
 	if err != nil {
 		fmt.Fprintf(stderr, "pwp policy validate: %v\n", err)
 

@@ -188,3 +188,66 @@ policy:
 
 	return policyPath
 }
+
+func TestRunEntropyDeterministicOutput(t *testing.T) {
+	policyPath := writeEntropyRejectionTestPolicy(t)
+
+	const runs = 4
+
+	var expected []byte
+
+	for runIndex := 0; runIndex < runs; runIndex++ {
+		var stdout bytes.Buffer
+		var stderr bytes.Buffer
+
+		code := run(
+			context.Background(),
+			[]string{"entropy", "--policy", policyPath},
+			bytes.NewReader(nil),
+			&stdout,
+			&stderr,
+		)
+
+		require.Equal(t, exitSuccess, code)
+		require.Empty(t, stderr.String())
+		require.NotEmpty(t, stdout.Bytes())
+
+		if runIndex == 0 {
+			expected = append([]byte(nil), stdout.Bytes()...)
+
+			continue
+		}
+
+		assert.Equal(t, expected, stdout.Bytes())
+	}
+}
+
+func writeEntropyRejectionTestPolicy(t *testing.T) string {
+	t.Helper()
+
+	tempDir := t.TempDir()
+
+	policyPath := filepath.Join(tempDir, "rejection-policy.yaml")
+
+	err := os.WriteFile(
+		policyPath,
+		[]byte(`version: 1
+policy:
+  name: entropy-rejection-test
+  length:
+    min: 8
+    max: 8
+  classes:
+    - name: symbols
+      alphabet: "ab"
+      min: 0
+  attempts: 100
+  forbid:
+    repeat_run: 1
+`),
+		0o600,
+	)
+	require.NoError(t, err)
+
+	return policyPath
+}
