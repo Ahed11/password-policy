@@ -1,0 +1,10 @@
+# Generated binaries
+/pwp
+/pwp.exe
+
+# Build and runtime output
+/build/
+
+# Go test artifacts
+*.test
+coverage.out
