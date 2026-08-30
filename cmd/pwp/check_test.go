@@ -1,0 +1,657 @@
+package main
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"io"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestCheckPassingPasswordFromFile(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitSuccess, code)
+
+	assert.Contains(t, stdout.String(), "password satisfies policy")
+
+	assert.Contains(t, stdout.String(), "check-test-policy")
+
+	assert.Empty(t, stderr.String())
+}
+
+func TestCheckPassingPasswordFromStdin(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			"-",
+		},
+		bytes.NewReader(
+			[]byte("aaaaaaaaaaaa\n"),
+		),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitSuccess, code)
+
+	assert.Contains(t, stdout.String(), "password satisfies policy")
+
+	assert.Empty(t, stderr.String())
+}
+
+func TestCheckViolationReturnsFailure(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaa\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitFailure, code)
+
+	assert.Contains(t, stdout.String(), "password does not satisfy policy")
+
+	assert.Contains(t, stdout.String(), "length FAILED")
+
+	assert.Empty(t, stderr.String())
+}
+
+func TestCheckContextViolation(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+			"--context",
+			"login=aaa",
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitFailure, code)
+
+	assert.Contains(t, stdout.String(), "password does not satisfy policy")
+
+	assert.Contains(t, stdout.String(), "context")
+
+	assert.NotContains(t, stderr.String(), "aaa")
+}
+
+func TestCheckRepeatedContextFlags(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+			"--context",
+			"login=bbb",
+			"--context",
+			"host=aaa",
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitFailure, code)
+
+	assert.Contains(t, stdout.String(), "context")
+
+	assert.Empty(t, stderr.String())
+}
+
+func TestCheckInvalidContextFormat(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+			"--context",
+			"invalid",
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "context must be in key=value form")
+}
+
+func TestCheckEmptyContextValue(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+			"--context",
+			"login=",
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "context value")
+}
+
+func TestCheckMissingPolicyFlag(t *testing.T) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--password-file",
+			"-",
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "--policy is required")
+
+	assert.Contains(t, stderr.String(), "Usage:")
+}
+
+func TestCheckMissingPasswordFileFlag(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "--password-file is required")
+
+	assert.Contains(t, stderr.String(), "Usage:")
+}
+
+func TestCheckMissingPolicyFile(t *testing.T) {
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	policyPath := filepath.Join(t.TempDir(), "missing.yaml")
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "pwp check:")
+}
+
+func TestCheckMissingPasswordFile(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := filepath.Join(t.TempDir(), "missing.txt")
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "read password file")
+}
+
+func TestCheckUnknownFlag(t *testing.T) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--unknown",
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "unknown")
+
+	assert.Contains(t, stderr.String(), "Usage:")
+}
+
+func TestCheckUnexpectedArgument(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	const secretArgument = "Secret123!"
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+			secretArgument,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), "pwp check: unexpected positional argument")
+
+	assert.NotContains(t, stderr.String(), secretArgument)
+}
+
+func TestCheckHelp(t *testing.T) {
+	tests := []struct {
+		name string
+		args []string
+	}{
+		{
+			name: "short help",
+			args: []string{
+				"check",
+				"-h",
+			},
+		},
+		{
+			name: "long help",
+			args: []string{
+				"check",
+				"--help",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+
+			code := run(context.Background(), tt.args, bytes.NewReader(nil), &stdout, &stderr)
+
+			assert.Equal(t, exitSuccess, code)
+
+			assert.Contains(t, stdout.String(), "pwp check --policy <file>")
+
+			assert.Empty(t, stderr.String())
+		},
+		)
+	}
+}
+
+func TestCheckCanceledContext(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte("aaaaaaaaaaaa\n"))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	code := run(
+		ctx,
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		&stdout,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Empty(t, stdout.String())
+
+	assert.Contains(t, stderr.String(), context.Canceled.Error())
+}
+
+func TestCheckResultWriteErrorDoesNotLeakPassword(t *testing.T) {
+	policyPath := writeCheckTestPolicy(t)
+
+	const password = "aaaaaaaaaaaa"
+
+	passwordPath := writeCheckTestPassword(t, "password.txt", []byte(password))
+
+	writer := &checkErrorWriter{
+		err: errors.New("forced write failure"),
+	}
+
+	var stderr bytes.Buffer
+
+	code := run(
+		context.Background(),
+		[]string{
+			"check",
+			"--policy",
+			policyPath,
+			"--password-file",
+			passwordPath,
+		},
+		bytes.NewReader(nil),
+		writer,
+		&stderr,
+	)
+
+	assert.Equal(t, exitUsage, code)
+
+	assert.Contains(t, stderr.String(), "forced write failure")
+
+	assert.NotContains(t, stderr.String(), password)
+}
+
+func TestReadCheckPasswordLF(t *testing.T) {
+	path := writeCheckTestPassword(t, "password.txt", []byte("password\n"))
+
+	password, err := readCheckPassword(path, bytes.NewReader(nil))
+	require.NoError(t, err)
+
+	assert.Equal(t, []byte("password"), password)
+}
+
+func TestReadCheckPasswordCRLF(t *testing.T) {
+	path := writeCheckTestPassword(t, "password.txt", []byte("password\r\n"))
+
+	password, err := readCheckPassword(path, bytes.NewReader(nil))
+	require.NoError(t, err)
+
+	assert.Equal(t, []byte("password"), password)
+}
+
+func TestReadCheckPasswordPreservesSpaces(t *testing.T) {
+	path := writeCheckTestPassword(t, "password.txt", []byte(" password \n"))
+
+	password, err := readCheckPassword(path, bytes.NewReader(nil))
+	require.NoError(t, err)
+
+	assert.Equal(t, []byte(" password "), password)
+}
+
+func TestReadCheckPasswordRemovesOnlyOneLineEnding(t *testing.T) {
+	path := writeCheckTestPassword(t, "password.txt", []byte("password\n\n"))
+
+	password, err := readCheckPassword(path, bytes.NewReader(nil))
+	require.NoError(t, err)
+
+	assert.Equal(t, []byte("password\n"), password)
+}
+
+func TestReadCheckPasswordFromStdin(t *testing.T) {
+	password, err := readCheckPassword("-", bytes.NewReader([]byte("password\n")))
+	require.NoError(t, err)
+
+	assert.Equal(t, []byte("password"), password)
+}
+
+func TestReadCheckPasswordStdinError(t *testing.T) {
+	reader := &checkErrorReader{
+		err: errors.New("forced read failure"),
+	}
+
+	password, err := readCheckPassword("-", reader)
+
+	assert.Error(t, err)
+
+	assert.ErrorContains(t, err, "read password from stdin")
+
+	assert.Nil(t, password)
+}
+
+func TestContextValuesFlag(t *testing.T) {
+	var values contextValuesFlag
+
+	require.NoError(t, values.Set("login=svc-01"))
+
+	require.NoError(t, values.Set("host=server-01"))
+
+	assert.Equal(
+		t,
+		[]string{
+			"svc-01",
+			"server-01",
+		},
+		values.values,
+	)
+}
+
+func TestContextValuesFlagEmptyKey(t *testing.T) {
+	var values contextValuesFlag
+
+	err := values.Set("=svc-01")
+
+	assert.Error(t, err)
+
+	assert.Empty(t, values.values)
+}
+
+func TestContextValuesFlagEmptyValue(t *testing.T) {
+	var values contextValuesFlag
+
+	err := values.Set("login=")
+
+	assert.Error(t, err)
+
+	assert.Empty(t, values.values)
+}
+
+func writeCheckTestPolicy(t *testing.T) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "policy.yaml")
+
+	err := os.WriteFile(
+		path,
+		[]byte(
+			`
+version: 1
+policy:
+  name: check-test-policy
+  length:
+    min: 12
+    max: 12
+  classes:
+    - name: letters
+      alphabet: "a"
+      min: 0
+`,
+		),
+		0o600,
+	)
+	require.NoError(t, err)
+
+	return path
+}
+
+func writeCheckTestPassword(t *testing.T, name string, password []byte) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), name)
+
+	err := os.WriteFile(path, password, 0o600)
+	require.NoError(t, err)
+
+	return path
+}
+
+type checkErrorWriter struct {
+	err error
+}
+
+func (w *checkErrorWriter) Write(_ []byte) (int, error) {
+	return 0, w.err
+}
+
+type checkErrorReader struct {
+	err error
+}
+
+func (r *checkErrorReader) Read(_ []byte) (int, error) {
+	return 0, r.err
+}
+
+var _ io.Reader = (*checkErrorReader)(nil)
+var _ io.Writer = (*checkErrorWriter)(nil)
